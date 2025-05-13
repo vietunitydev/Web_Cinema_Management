@@ -7,6 +7,12 @@ import Button from '../../components/common/Button';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { toast } from 'react-toastify';
 
+interface ErrorState
+{
+    cinemas: string | null,
+    hall: string | null,
+    submit: string | null,
+}
 const HallForm: React.FC = () => {
     const { id } = useParams<{ id: string }>(); // Hall ID if editing
     const navigate = useNavigate();
@@ -33,7 +39,7 @@ const HallForm: React.FC = () => {
         hall: isEditing,
         submit: false,
     });
-    const [error, setError] = useState({
+    const [error, setError] = useState<ErrorState>({
         cinemas: null,
         hall: null,
         submit: null,
@@ -54,7 +60,7 @@ const HallForm: React.FC = () => {
                 }
 
                 setError((prev) => ({ ...prev, cinemas: null }));
-            } catch (err) {
+            } catch {
                 setError((prev) => ({ ...prev, cinemas: 'Không thể tải danh sách rạp' }));
             } finally {
                 setLoading((prev) => ({ ...prev, cinemas: false }));
@@ -86,7 +92,7 @@ const HallForm: React.FC = () => {
                             foundCinema = cinema;
                             break;
                         }
-                    } catch (error) {
+                    } catch {
                         // Continue to the next cinema
                         continue;
                     }
@@ -105,7 +111,7 @@ const HallForm: React.FC = () => {
                 } else {
                     setError((prev) => ({ ...prev, hall: 'Không tìm thấy phòng chiếu' }));
                 }
-            } catch (err) {
+            } catch {
                 setError((prev) => ({ ...prev, hall: 'Không thể tải thông tin phòng chiếu' }));
             } finally {
                 setLoading((prev) => ({ ...prev, hall: false }));

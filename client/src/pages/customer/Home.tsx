@@ -7,6 +7,13 @@ import MovieCard from '../../components/common/MovieCard';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import Button from '../../components/common/Button';
 
+interface ErrorState
+{
+    nowPlaying: string | null,
+    comingSoon: string | null,
+    topRated: string | null,
+}
+
 const Home: React.FC = () => {
     const [nowPlayingMovies, setNowPlayingMovies] = useState<Movie[]>([]);
     const [comingSoonMovies, setComingSoonMovies] = useState<Movie[]>([]);
@@ -16,7 +23,7 @@ const Home: React.FC = () => {
         comingSoon: true,
         topRated: true,
     });
-    const [error, setError] = useState({
+    const [error, setError] = useState<ErrorState>({
         nowPlaying: null,
         comingSoon: null,
         topRated: null,
@@ -29,7 +36,7 @@ const Home: React.FC = () => {
                 const nowPlayingResponse = await movieService.getNowPlaying();
                 setNowPlayingMovies(nowPlayingResponse.data?.data || []);
                 setLoading((prev) => ({ ...prev, nowPlaying: false }));
-            } catch (_err) {
+            } catch {
                 setError((prev) => ({ ...prev, nowPlaying: 'Không thể tải phim đang chiếu' }));
                 setLoading((prev) => ({ ...prev, nowPlaying: false }));
             }
@@ -39,7 +46,7 @@ const Home: React.FC = () => {
                 const comingSoonResponse = await movieService.getComingSoon();
                 setComingSoonMovies(comingSoonResponse.data?.data || []);
                 setLoading((prev) => ({ ...prev, comingSoon: false }));
-            } catch (err) {
+            } catch {
                 setError((prev) => ({ ...prev, comingSoon: 'Không thể tải phim sắp chiếu' }));
                 setLoading((prev) => ({ ...prev, comingSoon: false }));
             }
@@ -49,7 +56,7 @@ const Home: React.FC = () => {
                 const topRatedResponse = await movieService.getTopRated();
                 setTopRatedMovies(topRatedResponse.data?.data || []);
                 setLoading((prev) => ({ ...prev, topRated: false }));
-            } catch (err) {
+            } catch {
                 setError((prev) => ({ ...prev, topRated: 'Không thể tải phim đánh giá cao' }));
                 setLoading((prev) => ({ ...prev, topRated: false }));
             }

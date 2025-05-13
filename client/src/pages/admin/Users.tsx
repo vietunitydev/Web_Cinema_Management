@@ -55,7 +55,7 @@ const Users: React.FC = () => {
                     setTotalItems(response.data.totalCount);
                     setTotalPages(response.data.totalPages);
                 }
-            } catch (err) {
+            } catch {
                 setError('Không thể tải danh sách người dùng. Vui lòng thử lại sau.');
             } finally {
                 setLoading(false);
@@ -104,7 +104,7 @@ const Users: React.FC = () => {
                                 return user;
                             }));
                             toast.success('Đã vô hiệu hóa tài khoản thành công');
-                        } catch (err) {
+                        } catch {
                             toast.error('Lỗi khi vô hiệu hóa tài khoản');
                         } finally {
                             setActionLoading(false);
@@ -139,7 +139,7 @@ const Users: React.FC = () => {
                                 return user;
                             }));
                             toast.success('Đã kích hoạt tài khoản thành công');
-                        } catch (err) {
+                        } catch {
                             toast.error('Lỗi khi kích hoạt tài khoản');
                         } finally {
                             setActionLoading(false);
@@ -169,7 +169,7 @@ const Users: React.FC = () => {
                             // Remove the user from state
                             setUsers(users.filter(user => user._id !== id));
                             toast.success('Xóa người dùng thành công');
-                        } catch (err) {
+                        } catch {
                             toast.error('Lỗi khi xóa người dùng');
                         } finally {
                             setActionLoading(false);

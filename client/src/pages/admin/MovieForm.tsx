@@ -48,7 +48,7 @@ const MovieForm: React.FC = () => {
                 } else {
                     setError('Không tìm thấy thông tin phim');
                 }
-            } catch (err) {
+            } catch {
                 setError('Lỗi khi tải thông tin phim');
             } finally {
                 setLoading(false);
@@ -116,7 +116,7 @@ const MovieForm: React.FC = () => {
                 }
 
                 navigate('/admin/movies');
-            } catch (err) {
+            } catch{
                 toast.error('Có lỗi xảy ra. Vui lòng thử lại sau.');
             } finally {
                 setSubmitting(false);
@@ -193,7 +193,6 @@ const MovieForm: React.FC = () => {
                         <input
                             type="text"
                             id="title"
-                            name="title"
                             className={`w-full rounded-md border ${
                                 formik.touched.title && formik.errors.title
                                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
@@ -214,7 +213,6 @@ const MovieForm: React.FC = () => {
                         </label>
                         <select
                             id="status"
-                            name="status"
                             className={`w-full rounded-md border ${
                                 formik.touched.status && formik.errors.status
                                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
@@ -238,7 +236,6 @@ const MovieForm: React.FC = () => {
                         </label>
                         <textarea
                             id="description"
-                            name="description"
                             rows={4}
                             className={`w-full rounded-md border ${
                                 formik.touched.description && formik.errors.description
@@ -261,7 +258,6 @@ const MovieForm: React.FC = () => {
                         <input
                             type="url"
                             id="posterUrl"
-                            name="posterUrl"
                             className={`w-full rounded-md border ${
                                 formik.touched.posterUrl && formik.errors.posterUrl
                                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
@@ -294,7 +290,6 @@ const MovieForm: React.FC = () => {
                         <input
                             type="url"
                             id="trailerUrl"
-                            name="trailerUrl"
                             className={`w-full rounded-md border ${
                                 formik.touched.trailerUrl && formik.errors.trailerUrl
                                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
@@ -321,7 +316,6 @@ const MovieForm: React.FC = () => {
                         <input
                             type="number"
                             id="duration"
-                            name="duration"
                             min="1"
                             className={`w-full rounded-md border ${
                                 formik.touched.duration && formik.errors.duration
@@ -343,7 +337,6 @@ const MovieForm: React.FC = () => {
                         </label>
                         <select
                             id="ageRestriction"
-                            name="ageRestriction"
                             className={`w-full rounded-md border ${
                                 formik.touched.ageRestriction && formik.errors.ageRestriction
                                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
@@ -371,7 +364,6 @@ const MovieForm: React.FC = () => {
                         <input
                             type="text"
                             id="director"
-                            name="director"
                             className={`w-full rounded-md border ${
                                 formik.touched.director && formik.errors.director
                                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
@@ -393,7 +385,6 @@ const MovieForm: React.FC = () => {
                         <input
                             type="text"
                             id="cast"
-                            name="cast"
                             className={`w-full rounded-md border ${
                                 formik.touched.cast && formik.errors.cast
                                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
@@ -416,7 +407,6 @@ const MovieForm: React.FC = () => {
                         <input
                             type="text"
                             id="genre"
-                            name="genre"
                             className={`w-full rounded-md border ${
                                 formik.touched.genre && formik.errors.genre
                                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
@@ -439,7 +429,6 @@ const MovieForm: React.FC = () => {
                         <input
                             type="text"
                             id="language"
-                            name="language"
                             className={`w-full rounded-md border ${
                                 formik.touched.language && formik.errors.language
                                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
@@ -461,7 +450,6 @@ const MovieForm: React.FC = () => {
                         <input
                             type="text"
                             id="subtitles"
-                            name="subtitles"
                             className={`w-full rounded-md border ${
                                 formik.touched.subtitles && formik.errors.subtitles
                                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
@@ -484,7 +472,6 @@ const MovieForm: React.FC = () => {
                         <input
                             type="date"
                             id="releaseDate"
-                            name="releaseDate"
                             className={`w-full rounded-md border ${
                                 formik.touched.releaseDate && formik.errors.releaseDate
                                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
@@ -505,7 +492,6 @@ const MovieForm: React.FC = () => {
                         <input
                             type="date"
                             id="endDate"
-                            name="endDate"
                             className={`w-full rounded-md border ${
                                 formik.touched.endDate && formik.errors.endDate
                                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500'

@@ -10,6 +10,12 @@ import Button from '../../components/common/Button';
 import { format, subDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { vi } from 'date-fns/locale';
 
+interface ErrorState {
+    report: string | null,
+    movies: string | null,
+    cinemas: string | null
+}
+
 const AdminReports: React.FC = () => {
     const { user } = useAuth();
 
@@ -37,7 +43,7 @@ const AdminReports: React.FC = () => {
         cinemas: true
     });
 
-    const [error, setError] = useState({
+    const [error, setError] = useState<ErrorState>({
         report: null,
         movies: null,
         cinemas: null
@@ -50,7 +56,7 @@ const AdminReports: React.FC = () => {
                 const moviesResponse = await movieService.getAllMovies();
                 setMovies(moviesResponse.data?.data || []);
                 setLoading(prev => ({ ...prev, movies: false }));
-            } catch (err) {
+            } catch {
                 setError(prev => ({ ...prev, movies: 'Không thể tải danh sách phim' }));
                 setLoading(prev => ({ ...prev, movies: false }));
             }
@@ -59,7 +65,7 @@ const AdminReports: React.FC = () => {
                 const cinemasResponse = await cinemaService.getAllCinemas();
                 setCinemas(cinemasResponse.data?.data || []);
                 setLoading(prev => ({ ...prev, cinemas: false }));
-            } catch (err) {
+            } catch {
                 setError(prev => ({ ...prev, cinemas: 'Không thể tải danh sách rạp' }));
                 setLoading(prev => ({ ...prev, cinemas: false }));
             }
@@ -102,8 +108,8 @@ const AdminReports: React.FC = () => {
                         break;
                 }
 
-                setReportData(response.data);
-            } catch (err) {
+                setReportData(response.data ?? null);
+            } catch {
                 setError(prev => ({ ...prev, report: 'Không thể tải dữ liệu báo cáo. Vui lòng thử lại sau.' }));
             } finally {
                 setLoading(prev => ({ ...prev, report: false }));

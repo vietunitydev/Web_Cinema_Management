@@ -10,6 +10,13 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { toast } from 'react-toastify';
 import { format } from 'date-fns';
 
+interface ErrorState {
+    formData: string | null,
+    movies: string | null,
+    cinemas: string | null,
+    submit: string | null,
+}
+
 const ShowtimeForm: React.FC = () => {
     const { id } = useParams<{ id: string }>(); // Get ID from URL if editing
     const navigate = useNavigate();
@@ -43,7 +50,7 @@ const ShowtimeForm: React.FC = () => {
         cinemas: true,
         submit: false,
     });
-    const [error, setError] = useState({
+    const [error, setError] = useState<ErrorState>({
         formData: null,
         movies: null,
         cinemas: null,
@@ -57,7 +64,7 @@ const ShowtimeForm: React.FC = () => {
                 const moviesResponse = await movieService.getAllMovies();
                 setMovies(moviesResponse.data?.data || []);
                 setError((prev) => ({ ...prev, movies: null }));
-            } catch (err) {
+            } catch {
                 setError((prev) => ({ ...prev, movies: 'Không thể tải danh sách phim' }));
             } finally {
                 setLoading((prev) => ({ ...prev, movies: false }));
@@ -67,7 +74,7 @@ const ShowtimeForm: React.FC = () => {
                 const cinemasResponse = await cinemaService.getAllCinemas();
                 setCinemas(cinemasResponse.data?.data || []);
                 setError((prev) => ({ ...prev, cinemas: null }));
-            } catch (err) {
+            } catch {
                 setError((prev) => ({ ...prev, cinemas: 'Không thể tải danh sách rạp' }));
             } finally {
                 setLoading((prev) => ({ ...prev, cinemas: false }));
@@ -88,7 +95,7 @@ const ShowtimeForm: React.FC = () => {
             try {
                 const hallsResponse = await cinemaService.getCinemaHalls(formData.cinemaId);
                 setHalls(hallsResponse.data || []);
-            } catch (err) {
+            } catch{
                 toast.error('Không thể tải danh sách phòng chiếu');
             }
         };
@@ -133,7 +140,7 @@ const ShowtimeForm: React.FC = () => {
                 });
 
                 setError((prev) => ({ ...prev, formData: null }));
-            } catch (err) {
+            } catch {
                 setError((prev) => ({ ...prev, formData: 'Không thể tải thông tin lịch chiếu' }));
             } finally {
                 setLoading((prev) => ({ ...prev, formData: false }));

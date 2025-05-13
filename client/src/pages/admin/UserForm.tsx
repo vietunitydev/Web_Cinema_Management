@@ -43,7 +43,7 @@ const UserForm: React.FC = () => {
                 } else {
                     setError('Không tìm thấy thông tin người dùng');
                 }
-            } catch (err) {
+            } catch {
                 setError('Lỗi khi tải thông tin người dùng');
             } finally {
                 setLoading(false);
@@ -198,7 +198,6 @@ const UserForm: React.FC = () => {
                         <input
                             type="text"
                             id="username"
-                            name="username"
                             className={`w-full rounded-md border ${
                                 formik.touched.username && formik.errors.username
                                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
@@ -221,7 +220,6 @@ const UserForm: React.FC = () => {
                         <input
                             type="email"
                             id="email"
-                            name="email"
                             className={`w-full rounded-md border ${
                                 formik.touched.email && formik.errors.email
                                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
@@ -243,7 +241,6 @@ const UserForm: React.FC = () => {
                         <input
                             type="password"
                             id="password"
-                            name="password"
                             className={`w-full rounded-md border ${
                                 formik.touched.password && formik.errors.password
                                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
@@ -265,7 +262,6 @@ const UserForm: React.FC = () => {
                         <input
                             type="password"
                             id="confirmPassword"
-                            name="confirmPassword"
                             className={`w-full rounded-md border ${
                                 formik.touched.confirmPassword && formik.errors.confirmPassword
                                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
@@ -292,7 +288,6 @@ const UserForm: React.FC = () => {
                         <input
                             type="text"
                             id="fullName"
-                            name="fullName"
                             className={`w-full rounded-md border ${
                                 formik.touched.fullName && formik.errors.fullName
                                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
@@ -314,7 +309,6 @@ const UserForm: React.FC = () => {
                         <input
                             type="tel"
                             id="phone"
-                            name="phone"
                             className={`w-full rounded-md border ${
                                 formik.touched.phone && formik.errors.phone
                                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
@@ -336,7 +330,6 @@ const UserForm: React.FC = () => {
                         <input
                             type="date"
                             id="dateOfBirth"
-                            name="dateOfBirth"
                             className={`w-full rounded-md border ${
                                 formik.touched.dateOfBirth && formik.errors.dateOfBirth
                                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
@@ -358,7 +351,6 @@ const UserForm: React.FC = () => {
                         <input
                             type="text"
                             id="address"
-                            name="address"
                             className={`w-full rounded-md border ${
                                 formik.touched.address && formik.errors.address
                                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
@@ -379,7 +371,6 @@ const UserForm: React.FC = () => {
                         </label>
                         <select
                             id="role"
-                            name="role"
                             className={`w-full rounded-md border ${
                                 formik.touched.role && formik.errors.role
                                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500'

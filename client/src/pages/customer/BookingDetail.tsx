@@ -46,7 +46,7 @@ const BookingDetail: React.FC = () => {
             setLoading(true);
             try {
                 const response = await bookingService.getBookingById(id);
-                setBooking(response.data);
+                setBooking(response.data ?? null);
 
                 // Check if user has already reviewed this movie with this booking
                 try {
@@ -61,7 +61,7 @@ const BookingDetail: React.FC = () => {
                 }
 
                 setError(null);
-            } catch (err) {
+            } catch {
                 setError('Không thể tải thông tin đặt vé');
             } finally {
                 setLoading(false);

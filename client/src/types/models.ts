@@ -12,6 +12,7 @@ export interface User {
     preferences?: {
         favoriteGenres?: string[];
     };
+    isActive? : boolean;
 }
 
 export interface Movie {

@@ -10,6 +10,14 @@ import { format, subDays, startOfWeek, endOfWeek } from 'date-fns';
 import { Link } from 'react-router-dom';
 import Button from '../../components/common/Button';
 
+interface ErrorState {
+    daily: string | null;
+    movies: string | null;
+    cinemas: string | null;
+    recentMovies: string | null;
+    recentUsers: string | null;
+}
+
 const Dashboard: React.FC = () => {
     const { user } = useAuth();
     const [timeRange, setTimeRange] = useState<'day' | 'week' | 'month'>('week');
@@ -25,7 +33,7 @@ const Dashboard: React.FC = () => {
         recentMovies: true,
         recentUsers: true
     });
-    const [error, setError] = useState({
+    const [error, setError] = useState<ErrorState>({
         daily: null,
         movies: null,
         cinemas: null,
@@ -48,13 +56,15 @@ const Dashboard: React.FC = () => {
                     startDate: format(startOfWeek(today, { weekStartsOn: 1 }), 'yyyy-MM-dd'),
                     endDate: format(endOfWeek(today, { weekStartsOn: 1 }), 'yyyy-MM-dd'),
                 };
-            case 'month':
+            case 'month':{
                 const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
                 const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
                 return {
                     startDate: format(startOfMonth, 'yyyy-MM-dd'),
                     endDate: format(endOfMonth, 'yyyy-MM-dd'),
                 };
+            }
+
             default:
                 return {
                     startDate: format(subDays(today, 7), 'yyyy-MM-dd'),
@@ -85,9 +95,9 @@ const Dashboard: React.FC = () => {
             // Fetch daily stats
             try {
                 const response = await bookingService.getDailyStats(startDate, endDate);
-                setDailyStats(response.data);
+                setDailyStats(response.data ?? null);
                 setLoading((prev) => ({ ...prev, daily: false }));
-            } catch (err) {
+            } catch {
                 setError((prev) => ({ ...prev, daily: 'Không thể tải dữ liệu thống kê theo ngày' }));
                 setLoading((prev) => ({ ...prev, daily: false }));
             }
@@ -95,9 +105,9 @@ const Dashboard: React.FC = () => {
             // Fetch movie stats
             try {
                 const response = await bookingService.getMovieStats(startDate, endDate);
-                setMovieStats(response.data);
+                setMovieStats(response.data ?? null);
                 setLoading((prev) => ({ ...prev, movies: false }));
-            } catch (err) {
+            } catch {
                 setError((prev) => ({ ...prev, movies: 'Không thể tải dữ liệu thống kê theo phim' }));
                 setLoading((prev) => ({ ...prev, movies: false }));
             }
@@ -105,9 +115,9 @@ const Dashboard: React.FC = () => {
             // Fetch cinema stats
             try {
                 const response = await bookingService.getCinemaStats(startDate, endDate);
-                setCinemaStats(response.data);
+                setCinemaStats(response.data ?? null);
                 setLoading((prev) => ({ ...prev, cinemas: false }));
-            } catch (err) {
+            } catch {
                 setError((prev) => ({ ...prev, cinemas: 'Không thể tải dữ liệu thống kê theo rạp' }));
                 setLoading((prev) => ({ ...prev, cinemas: false }));
             }
@@ -124,7 +134,7 @@ const Dashboard: React.FC = () => {
                 const response = await movieService.getAllMovies({ limit: 5, sort: '-_id' });
                 setRecentMovies(response.data?.data || []);
                 setLoading(prev => ({ ...prev, recentMovies: false }));
-            } catch (err) {
+            } catch {
                 setError(prev => ({ ...prev, recentMovies: 'Không thể tải danh sách phim mới nhất' }));
                 setLoading(prev => ({ ...prev, recentMovies: false }));
             }
@@ -134,7 +144,7 @@ const Dashboard: React.FC = () => {
                 const response = await userService.getAllUsers(1, 5);
                 setRecentUsers(response.data?.data || []);
                 setLoading(prev => ({ ...prev, recentUsers: false }));
-            } catch (err) {
+            } catch {
                 setError(prev => ({ ...prev, recentUsers: 'Không thể tải danh sách người dùng mới nhất' }));
                 setLoading(prev => ({ ...prev, recentUsers: false }));
             }

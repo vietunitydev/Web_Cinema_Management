@@ -260,7 +260,6 @@ const PromotionForm: React.FC = () => {
                         <input
                             type="text"
                             id="name"
-                            name="name"
                             className={`w-full rounded-md border ${
                                 formik.touched.name && formik.errors.name
                                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
@@ -282,7 +281,6 @@ const PromotionForm: React.FC = () => {
                         <input
                             type="text"
                             id="couponCode"
-                            name="couponCode"
                             className={`w-full rounded-md border ${
                                 formik.touched.couponCode && formik.errors.couponCode
                                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
@@ -304,7 +302,6 @@ const PromotionForm: React.FC = () => {
                         </label>
                         <textarea
                             id="description"
-                            name="description"
                             rows={3}
                             className={`w-full rounded-md border ${
                                 formik.touched.description && formik.errors.description
@@ -331,7 +328,6 @@ const PromotionForm: React.FC = () => {
                         </label>
                         <select
                             id="type"
-                            name="type"
                             className={`w-full rounded-md border ${
                                 formik.touched.type && formik.errors.type
                                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
@@ -358,7 +354,6 @@ const PromotionForm: React.FC = () => {
                                 <input
                                     type="number"
                                     id="value"
-                                    name="value"
                                     className={`w-full rounded-md border ${
                                         formik.touched.value && formik.errors.value
                                             ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
@@ -391,7 +386,6 @@ const PromotionForm: React.FC = () => {
                             <input
                                 type="number"
                                 id="minPurchase"
-                                name="minPurchase"
                                 className={`w-full rounded-md border ${
                                     formik.touched.minPurchase && formik.errors.minPurchase
                                         ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
@@ -422,7 +416,6 @@ const PromotionForm: React.FC = () => {
                                 <input
                                     type="number"
                                     id="maxDiscount"
-                                    name="maxDiscount"
                                     className={`w-full rounded-md border ${
                                         formik.touched.maxDiscount && formik.errors.maxDiscount
                                             ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
@@ -452,7 +445,6 @@ const PromotionForm: React.FC = () => {
                         <input
                             type="number"
                             id="usageLimit"
-                            name="usageLimit"
                             min="1"
                             className={`w-full rounded-md border ${
                                 formik.touched.usageLimit && formik.errors.usageLimit
@@ -480,7 +472,6 @@ const PromotionForm: React.FC = () => {
                         <input
                             type="date"
                             id="startDate"
-                            name="startDate"
                             className={`w-full rounded-md border ${
                                 formik.touched.startDate && formik.errors.startDate
                                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
@@ -501,7 +492,6 @@ const PromotionForm: React.FC = () => {
                         <input
                             type="date"
                             id="endDate"
-                            name="endDate"
                             className={`w-full rounded-md border ${
                                 formik.touched.endDate && formik.errors.endDate
                                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
@@ -522,7 +512,6 @@ const PromotionForm: React.FC = () => {
                         </label>
                         <select
                             id="status"
-                            name="status"
                             className={`w-full rounded-md border ${
                                 formik.touched.status && formik.errors.status
                                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500'

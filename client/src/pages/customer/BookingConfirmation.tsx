@@ -20,9 +20,9 @@ const BookingConfirmation: React.FC = () => {
 
             try {
                 const response = await bookingService.getBookingById(id);
-                setBooking(response.data);
+                setBooking(response.data ?? null);
                 setLoading(false);
-            } catch (err) {
+            } catch {
                 setError('Không thể tải thông tin đặt vé');
                 setLoading(false);
             }

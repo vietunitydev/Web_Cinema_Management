@@ -56,7 +56,7 @@ const Promotions: React.FC = () => {
                     setTotalItems(response.data.totalCount);
                     setTotalPages(response.data.totalPages);
                 }
-            } catch (err) {
+            } catch{
                 setError('Không thể tải danh sách khuyến mãi. Vui lòng thử lại sau.');
             } finally {
                 setLoading(false);
@@ -105,7 +105,7 @@ const Promotions: React.FC = () => {
                             await promotionService.deletePromotion(id);
                             setPromotions(promotions.filter(promo => promo._id !== id));
                             toast.success('Xóa khuyến mãi thành công');
-                        } catch (err) {
+                        } catch {
                             toast.error('Lỗi khi xóa khuyến mãi');
                         } finally {
                             setActionLoading(false);
@@ -141,7 +141,7 @@ const Promotions: React.FC = () => {
                                 setTotalItems(refreshResponse.data.totalCount);
                                 setTotalPages(refreshResponse.data.totalPages);
                             }
-                        } catch (err) {
+                        } catch {
                             toast.error('Lỗi khi cập nhật trạng thái khuyến mãi');
                         } finally {
                             setActionLoading(false);

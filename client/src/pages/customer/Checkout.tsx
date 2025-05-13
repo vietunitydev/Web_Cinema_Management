@@ -20,6 +20,12 @@ interface BookingData {
     total: number;
 }
 
+interface ErrorState
+{
+    showtime: string | null,
+    booking: string | null,
+}
+
 const Checkout: React.FC = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
@@ -32,7 +38,7 @@ const Checkout: React.FC = () => {
         showtime: true,
         booking: false,
     });
-    const [error, setError] = useState({
+    const [error, setError] = useState<ErrorState>({
         showtime: null,
         booking: null,
     });
@@ -52,9 +58,9 @@ const Checkout: React.FC = () => {
         const fetchShowtime = async () => {
             try {
                 const response = await showtimeService.getShowtimeById(parsedData.showtimeId);
-                setShowtime(response.data);
+                setShowtime(response.data ?? null);
                 setLoading((prev) => ({ ...prev, showtime: false }));
-            } catch (err) {
+            } catch {
                 setError((prev) => ({ ...prev, showtime: 'Không thể tải thông tin suất chiếu' }));
                 setLoading((prev) => ({ ...prev, showtime: false }));
             }

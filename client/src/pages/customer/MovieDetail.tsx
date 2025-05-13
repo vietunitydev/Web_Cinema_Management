@@ -9,6 +9,13 @@ import Button from '../../components/common/Button';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 
+interface ErrorState
+{
+    movie: string | null,
+    reviews: string | null,
+    showtimes: string | null,
+}
+
 const MovieDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const [movie, setMovie] = useState<Movie | null>(null);
@@ -19,7 +26,7 @@ const MovieDetail: React.FC = () => {
         reviews: true,
         showtimes: true,
     });
-    const [error, setError] = useState({
+    const [error, setError] = useState<ErrorState>({
         movie: null,
         reviews: null,
         showtimes: null,
@@ -35,9 +42,9 @@ const MovieDetail: React.FC = () => {
             // Fetch movie details
             try {
                 const response = await movieService.getMovieById(id);
-                setMovie(response.data);
+                setMovie(response.data ?? null);
                 setLoading((prev) => ({ ...prev, movie: false }));
-            } catch (err) {
+            } catch {
                 setError((prev) => ({ ...prev, movie: 'Không thể tải thông tin phim' }));
                 setLoading((prev) => ({ ...prev, movie: false }));
             }
@@ -47,7 +54,7 @@ const MovieDetail: React.FC = () => {
                 const response = await movieService.getMovieReviews(id);
                 setReviews(response.data?.data || []);
                 setLoading((prev) => ({ ...prev, reviews: false }));
-            } catch (err) {
+            } catch {
                 setError((prev) => ({ ...prev, reviews: 'Không thể tải đánh giá phim' }));
                 setLoading((prev) => ({ ...prev, reviews: false }));
             }
@@ -58,7 +65,7 @@ const MovieDetail: React.FC = () => {
                 const response = await movieService.getMovieShowtimes(id, today);
                 setUpcomingShowtimes(response.data || []);
                 setLoading((prev) => ({ ...prev, showtimes: false }));
-            } catch (err) {
+            } catch {
                 setError((prev) => ({ ...prev, showtimes: 'Không thể tải lịch chiếu' }));
                 setLoading((prev) => ({ ...prev, showtimes: false }));
             }
