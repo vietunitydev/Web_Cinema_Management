@@ -1,0 +1,40 @@
+{
+  "name": "cinema-management-api",
+  "version": "1.0.0",
+  "description": "Backend API for Cinema Management System",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "prod": "NODE_ENV=production node src/server.js",
+    "seed": "node src/seed.js"
+  },
+  "author": "Your Name",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cloudinary": "^1.27.0",
+    "compression": "^1.7.4",
+    "cookie-parser": "^1.4.5",
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "express-mongo-sanitize": "^2.1.0",
+    "express-rate-limit": "^5.3.0",
+    "express-validator": "^6.12.1",
+    "helmet": "^4.6.0",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.0.8",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.3",
+    "multer-storage-cloudinary": "^4.0.0",
+    "validator": "^13.6.0",
+    "xss-clean": "^0.1.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
