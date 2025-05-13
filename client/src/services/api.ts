@@ -26,42 +26,42 @@ apiClient.interceptors.request.use(
 );
 
 // Interceptor cho response
-apiClient.interceptors.response.use(
-    (response) => {
-        return response;
-    },
-    async (error) => {
-        const originalRequest = error.config;
-
-        // Kiểm tra nếu lỗi là 401 (Unauthorized) và chưa thử refresh token
-        if (error.response?.status === 401 && !originalRequest._retry) {
-            originalRequest._retry = true;
-
-            try {
-                // Gọi API để refresh token
-                const response = await apiClient.post('/auth/refresh-token');
-                const { token } = response.data;
-
-                // Lưu token mới vào localStorage
-                localStorage.setItem('token', token);
-
-                // Cập nhật Authorization header
-                originalRequest.headers.Authorization = `Bearer ${token}`;
-
-                // Gửi lại request ban đầu với token mới
-                return apiClient(originalRequest);
-            } catch (refreshError) {
-                // Nếu refresh token thất bại, đăng xuất người dùng
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                window.location.href = '/login';
-                return Promise.reject(refreshError);
-            }
-        }
-
-        return Promise.reject(error);
-    }
-);
+// apiClient.interceptors.response.use(
+//     (response) => {
+//         return response;
+//     },
+//     async (error) => {
+//         const originalRequest = error.config;
+//
+//         // Kiểm tra nếu lỗi là 401 (Unauthorized) và chưa thử refresh token
+//         if (error.response?.status === 401 && !originalRequest._retry) {
+//             originalRequest._retry = true;
+//
+//             try {
+//                 // Gọi API để refresh token
+//                 const response = await apiClient.post('/auth/refresh-token');
+//                 const { token } = response.data;
+//
+//                 // Lưu token mới vào localStorage
+//                 localStorage.setItem('token', token);
+//
+//                 // Cập nhật Authorization header
+//                 originalRequest.headers.Authorization = `Bearer ${token}`;
+//
+//                 // Gửi lại request ban đầu với token mới
+//                 return apiClient(originalRequest);
+//             } catch (refreshError) {
+//                 // Nếu refresh token thất bại, đăng xuất người dùng
+//                 localStorage.removeItem('token');
+//                 localStorage.removeItem('user');
+//                 window.location.href = '/login';
+//                 return Promise.reject(refreshError);
+//             }
+//         }
+//
+//         return Promise.reject(error);
+//     }
+// );
 
 // Hàm wrapper xử lý API request tiện lợi
 const api = {
