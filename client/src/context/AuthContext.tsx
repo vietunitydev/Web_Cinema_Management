@@ -55,6 +55,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setIsLoading(true);
         setError(null);
         try {
+            console.log("login")
             const response = await authService.login(email, password);
             const { user, token } = response.data!;
             setUser(user);

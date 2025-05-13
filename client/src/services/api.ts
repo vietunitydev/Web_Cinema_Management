@@ -4,7 +4,7 @@ import type { AxiosInstance, AxiosRequestConfig } from 'axios';
 
 // Tạo đối tượng axios instance với cấu hình chung
 const apiClient: AxiosInstance = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api',
+    baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:4999/api',
     headers: {
         'Content-Type': 'application/json',
     },
