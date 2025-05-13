@@ -16,8 +16,8 @@ interface RegisterData {
 }
 
 export const authService = {
-    login: (email: string, password: string) =>
-        api.post<ApiResponse<LoginResponse>>('/auth/login', { email, password }),
+    login: (username: string, password: string) =>
+        api.post<ApiResponse<LoginResponse>>('/auth/login', { username, password }),
 
     register: (userData: RegisterData) =>
         api.post<ApiResponse<User>>('/auth/register', userData),
