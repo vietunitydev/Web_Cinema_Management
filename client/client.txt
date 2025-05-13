@@ -1,0 +1,28 @@
+cinema-management-frontend/
+├── src/
+│   ├── assets/            # Hình ảnh, icon, fonts
+│   ├── components/        # Các component dùng chung
+│   │   ├── common/        # UI components dùng nhiều nơi
+│   │   ├── layout/        # Layout components
+│   │   ├── admin/         # Components cho khu vực admin
+│   │   ├── manager/       # Components cho khu vực quản lý rạp
+│   │   └── customer/      # Components cho khu vực khách hàng
+│   ├── context/           # React Context
+│   ├── hooks/             # Custom hooks
+│   ├── pages/             # Các trang chính
+│   │   ├── admin/         # Trang cho admins
+│   │   ├── manager/       # Trang cho quản lý rạp
+│   │   ├── customer/      # Trang cho khách hàng
+│   │   └── auth/          # Trang đăng nhập, đăng ký
+│   ├── services/          # API service layers
+│   ├── types/             # TypeScript type definitions
+│   ├── utils/             # Helper functions
+│   ├── App.tsx            # App component
+│   ├── main.tsx           # Entry point
+│   └── routes.tsx         # Router configurations
+├── public/                # Static files
+├── index.html             # HTML template
+├── tailwind.config.js     # Tailwind configuration
+├── tsconfig.json          # TypeScript configuration
+├── vite.config.ts         # Vite configuration
+└── package.json           # Project dependencies
