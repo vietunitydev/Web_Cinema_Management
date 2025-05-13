@@ -19,15 +19,15 @@ import Home from './pages/customer/Home';
 import Movies from './pages/customer/Movies';
 import MovieDetail from './pages/customer/MovieDetail';
 import Cinemas from './pages/customer/Cinemas';
-// import CinemaDetail from './pages/customer/CinemaDetail';
+import CinemaDetail from './pages/customer/CinemaDetail';
 import ShowtimeSelection from './pages/customer/ShowtimeSelection';
 import SeatSelection from './pages/customer/SeatSelection';
 import Checkout from './pages/customer/Checkout';
 import BookingConfirmation from './pages/customer/BookingConfirmation';
-// import Profile from './pages/customer/Profile';
-// import BookingHistory from './pages/customer/BookingHistory';
-// import BookingDetail from './pages/customer/BookingDetail';
-// import Promotions from './pages/customer/Promotions';
+import Profile from './pages/customer/Profile';
+import BookingHistory from './pages/customer/BookingHistory';
+import BookingDetail from './pages/customer/BookingDetail';
+import Promotions from './pages/customer/Promotions';
 
 // Manager Pages
 import ManagerDashboard from './pages/manager/Dashboard';
@@ -133,10 +133,10 @@ export const routes: RouteObject[] = [
                 path: '/cinemas',
                 element: <Cinemas />,
             },
-            // {
-            //     path: '/cinemas/:id',
-            //     element: <CinemaDetail />,
-            // },
+            {
+                path: '/cinemas/:id',
+                element: <CinemaDetail />,
+            },
             {
                 path: '/movies/:id/showtimes',
                 element: <ShowtimeSelection />,
@@ -165,34 +165,34 @@ export const routes: RouteObject[] = [
                     </ProtectedRoute>
                 ),
             },
-            // {
-            //     path: '/profile',
-            //     element: (
-            //         <ProtectedRoute>
-            //             <Profile />
-            //         </ProtectedRoute>
-            //     ),
-            // },
-            // {
-            //     path: '/bookings',
-            //     element: (
-            //         <ProtectedRoute>
-            //             <BookingHistory />
-            //         </ProtectedRoute>
-            //     ),
-            // },
-            // {
-            //     path: '/bookings/:id',
-            //     element: (
-            //         <ProtectedRoute>
-            //             <BookingDetail />
-            //         </ProtectedRoute>
-            //     ),
-            // },
-            // {
-            //     path: '/promotions',
-            //     element: <Promotions />,
-            // },
+            {
+                path: '/profile',
+                element: (
+                    <ProtectedRoute>
+                        <Profile />
+                    </ProtectedRoute>
+                ),
+            },
+            {
+                path: '/bookings',
+                element: (
+                    <ProtectedRoute>
+                        <BookingHistory />
+                    </ProtectedRoute>
+                ),
+            },
+            {
+                path: '/bookings/:id',
+                element: (
+                    <ProtectedRoute>
+                        <BookingDetail />
+                    </ProtectedRoute>
+                ),
+            },
+            {
+                path: '/promotions',
+                element: <Promotions />,
+            },
         ],
     },
 
