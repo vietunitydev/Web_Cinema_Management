@@ -32,20 +32,20 @@ import Promotions from './pages/customer/Promotions';
 // Manager Pages
 import ManagerDashboard from './pages/manager/Dashboard';
 import ManagerShowtimes from './pages/manager/Showtimes';
-import ManagerShowtimeForm from './pages/manager/ShowtimeForm.tsx';
+import ManagerShowtimeForm from './pages/manager/ShowtimeForm';
 import ManagerHalls from './pages/manager/Halls';
 import ManagerHallForm from './pages/manager/HallForm';
 import ManagerReports from './pages/manager/Reports';
 
 // Admin Pages
-// import AdminDashboard from './pages/admin/Dashboard';
-// import AdminMovies from './pages/admin/Movies';
-// import AdminMovieForm from './pages/admin/MovieForm';
-// import AdminUsers from './pages/admin/Users';
-// import AdminUserForm from './pages/admin/UserForm';
-// import AdminPromotions from './pages/admin/Promotions';
-// import AdminPromotionForm from './pages/admin/PromotionForm';
-// import AdminReports from './pages/admin/Reports';
+import AdminDashboard from './pages/admin/Dashboard';
+import AdminMovies from './pages/admin/Movies';
+import AdminMovieForm from './pages/admin/MovieForm';
+import AdminUsers from './pages/admin/Users';
+import AdminUserForm from './pages/admin/UserForm';
+import AdminPromotions from './pages/admin/Promotions';
+import AdminPromotionForm from './pages/admin/PromotionForm';
+import AdminReports from './pages/admin/Reports';
 
 // Error Pages
 import NotFound from './pages/NotFound';
@@ -299,116 +299,116 @@ export const routes: RouteObject[] = [
             </ProtectedRoute>
         ),
     },
-    // {
-    //     path: '/admin/dashboard',
-    //     element: (
-    //         <ProtectedRoute requiredRole="admin">
-    //             <AdminLayout>
-    //                 <AdminDashboard />
-    //             </AdminLayout>
-    //         </ProtectedRoute>
-    //     ),
-    // },
-    // {
-    //     path: '/admin/movies',
-    //     element: (
-    //         <ProtectedRoute requiredRole="admin">
-    //             <AdminLayout>
-    //                 <AdminMovies />
-    //             </AdminLayout>
-    //         </ProtectedRoute>
-    //     ),
-    // },
-    // {
-    //     path: '/admin/movies/create',
-    //     element: (
-    //         <ProtectedRoute requiredRole="admin">
-    //             <AdminLayout>
-    //                 <AdminMovieForm />
-    //             </AdminLayout>
-    //         </ProtectedRoute>
-    //     ),
-    // },
-    // {
-    //     path: '/admin/movies/:id/edit',
-    //     element: (
-    //         <ProtectedRoute requiredRole="admin">
-    //             <AdminLayout>
-    //                 <AdminMovieForm />
-    //             </AdminLayout>
-    //         </ProtectedRoute>
-    //     ),
-    // },
-    // {
-    //     path: '/admin/users',
-    //     element: (
-    //         <ProtectedRoute requiredRole="admin">
-    //             <AdminLayout>
-    //                 <AdminUsers />
-    //             </AdminLayout>
-    //         </ProtectedRoute>
-    //     ),
-    // },
-    // {
-    //     path: '/admin/users/create',
-    //     element: (
-    //         <ProtectedRoute requiredRole="admin">
-    //             <AdminLayout>
-    //                 <AdminUserForm />
-    //             </AdminLayout>
-    //         </ProtectedRoute>
-    //     ),
-    // },
-    // {
-    //     path: '/admin/users/:id/edit',
-    //     element: (
-    //         <ProtectedRoute requiredRole="admin">
-    //             <AdminLayout>
-    //                 <AdminUserForm />
-    //             </AdminLayout>
-    //         </ProtectedRoute>
-    //     ),
-    // },
-    // {
-    //     path: '/admin/promotions',
-    //     element: (
-    //         <ProtectedRoute requiredRole="admin">
-    //             <AdminLayout>
-    //                 <AdminPromotions />
-    //             </AdminLayout>
-    //         </ProtectedRoute>
-    //     ),
-    // },
-    // {
-    //     path: '/admin/promotions/create',
-    //     element: (
-    //         <ProtectedRoute requiredRole="admin">
-    //             <AdminLayout>
-    //                 <AdminPromotionForm />
-    //             </AdminLayout>
-    //         </ProtectedRoute>
-    //     ),
-    // },
-    // {
-    //     path: '/admin/promotions/:id/edit',
-    //     element: (
-    //         <ProtectedRoute requiredRole="admin">
-    //             <AdminLayout>
-    //                 <AdminPromotionForm />
-    //             </AdminLayout>
-    //         </ProtectedRoute>
-    //     ),
-    // },
-    // {
-    //     path: '/admin/reports',
-    //     element: (
-    //         <ProtectedRoute requiredRole="admin">
-    //             <AdminLayout>
-    //                 <AdminReports />
-    //             </AdminLayout>
-    //         </ProtectedRoute>
-    //     ),
-    // },
+    {
+        path: '/admin/dashboard',
+        element: (
+            <ProtectedRoute requiredRole="admin">
+                <AdminLayout>
+                    <AdminDashboard />
+                </AdminLayout>
+            </ProtectedRoute>
+        ),
+    },
+    {
+        path: '/admin/movies',
+        element: (
+            <ProtectedRoute requiredRole="admin">
+                <AdminLayout>
+                    <AdminMovies />
+                </AdminLayout>
+            </ProtectedRoute>
+        ),
+    },
+    {
+        path: '/admin/movies/create',
+        element: (
+            <ProtectedRoute requiredRole="admin">
+                <AdminLayout>
+                    <AdminMovieForm />
+                </AdminLayout>
+            </ProtectedRoute>
+        ),
+    },
+    {
+        path: '/admin/movies/:id/edit',
+        element: (
+            <ProtectedRoute requiredRole="admin">
+                <AdminLayout>
+                    <AdminMovieForm />
+                </AdminLayout>
+            </ProtectedRoute>
+        ),
+    },
+    {
+        path: '/admin/users',
+        element: (
+            <ProtectedRoute requiredRole="admin">
+                <AdminLayout>
+                    <AdminUsers />
+                </AdminLayout>
+            </ProtectedRoute>
+        ),
+    },
+    {
+        path: '/admin/users/create',
+        element: (
+            <ProtectedRoute requiredRole="admin">
+                <AdminLayout>
+                    <AdminUserForm />
+                </AdminLayout>
+            </ProtectedRoute>
+        ),
+    },
+    {
+        path: '/admin/users/:id/edit',
+        element: (
+            <ProtectedRoute requiredRole="admin">
+                <AdminLayout>
+                    <AdminUserForm />
+                </AdminLayout>
+            </ProtectedRoute>
+        ),
+    },
+    {
+        path: '/admin/promotions',
+        element: (
+            <ProtectedRoute requiredRole="admin">
+                <AdminLayout>
+                    <AdminPromotions />
+                </AdminLayout>
+            </ProtectedRoute>
+        ),
+    },
+    {
+        path: '/admin/promotions/create',
+        element: (
+            <ProtectedRoute requiredRole="admin">
+                <AdminLayout>
+                    <AdminPromotionForm />
+                </AdminLayout>
+            </ProtectedRoute>
+        ),
+    },
+    {
+        path: '/admin/promotions/:id/edit',
+        element: (
+            <ProtectedRoute requiredRole="admin">
+                <AdminLayout>
+                    <AdminPromotionForm />
+                </AdminLayout>
+            </ProtectedRoute>
+        ),
+    },
+    {
+        path: '/admin/reports',
+        element: (
+            <ProtectedRoute requiredRole="admin">
+                <AdminLayout>
+                    <AdminReports />
+                </AdminLayout>
+            </ProtectedRoute>
+        ),
+    },
 
     // 404 route
     {
