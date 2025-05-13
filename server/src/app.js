@@ -34,12 +34,12 @@ app.use(cors({
 app.use(helmet()); // Thiết lập các HTTP headers bảo mật
 
 // Giới hạn request từ một IP
-const limiter = rateLimit({
-    max: 100, // Số lượng request tối đa
-    windowMs: 60 * 60 * 1000, // Khoảng thời gian: 1 giờ
-    message: 'Quá nhiều yêu cầu từ IP này, vui lòng thử lại sau 1 giờ!'
-});
-app.use('/api', limiter);
+// const limiter = rateLimit({
+//     max: 100, // Số lượng request tối đa
+//     windowMs: 60 * 60 * 1000, // Khoảng thời gian: 1 giờ
+//     message: 'Quá nhiều yêu cầu từ IP này, vui lòng thử lại sau 1 giờ!'
+// });
+// app.use('/api', limiter);
 
 // Middleware phân tích body request
 app.use(express.json({ limit: '10kb' })); // Giới hạn kích thước JSON
