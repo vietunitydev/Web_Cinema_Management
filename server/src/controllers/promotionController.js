@@ -27,13 +27,24 @@ exports.getAllPromotions = catchAsync(async (req, res, next) => {
         .limitFields()
         .paginate();
 
-    const promotions = await features.query;
+    const data = await features.query;
 
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const totalCount = await Promotion.countDocuments(features.queryObj);
+    const totalPages = Math.ceil(totalCount / limit);
+
+    // Trả về kết quả
     res.status(200).json({
         status: 'success',
-        results: promotions.length,
         data: {
-            promotions
+            data,
+            totalCount,
+            page,
+            limit,
+            totalPages
         }
     });
 });
