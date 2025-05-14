@@ -42,6 +42,7 @@ const Movies: React.FC = () => {
 
                 // Update state with fetched data
                 if (response.data) {
+                    console.log(response.data);
                     setMovies(response.data.data);
                     setTotalItems(response.data.totalCount);
                     setTotalPages(response.data.totalPages);

@@ -29,9 +29,15 @@ router.use(authMiddleware.protect);
 router.use(authMiddleware.restrictTo('admin', 'manager'));
 
 // Quản lý phim
+// router.route('/')
+//     .post(uploadMiddleware.uploadMovieImages,
+//         uploadMiddleware.processMovieImages,
+//         movieValidation,
+//         validate,
+//         movieController.createMovie);
+
 router.route('/')
-    .post(uploadMiddleware.uploadMovieImages,
-        uploadMiddleware.processMovieImages,
+    .post(
         movieValidation,
         validate,
         movieController.createMovie);

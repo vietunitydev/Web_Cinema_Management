@@ -7,18 +7,21 @@ class APIFeatures {
 
     // Lọc theo các trường
     filter() {
-        // Tạo bản sao của query
         const queryObj = { ...this.queryString };
-
-        // Loại bỏ các trường đặc biệt
         const excludedFields = ['page', 'sort', 'limit', 'fields'];
-        excludedFields.forEach(field => delete queryObj[field]);
+        excludedFields.forEach(el => delete queryObj[el]);
 
-        // Tìm kiếm nâng cao: >, >=, <, <=
+        Object.keys(queryObj).forEach(key => {
+            if (queryObj[key] === '') {
+                delete queryObj[key];
+            }
+        });
+
         let queryStr = JSON.stringify(queryObj);
         queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
 
         this.query = this.query.find(JSON.parse(queryStr));
+        this.queryObj = queryObj;
 
         return this;
     }
@@ -51,8 +54,8 @@ class APIFeatures {
 
     // Phân trang
     paginate() {
-        const page = this.queryString.page * 1 || 1; // Mặc định trang 1
-        const limit = this.queryString.limit * 1 || 10; // Mặc định 10 items/trang
+        const page = this.queryString.page * 1 || 1;
+        const limit = this.queryString.limit * 1 || 10;
         const skip = (page - 1) * limit;
 
         this.query = this.query.skip(skip).limit(limit);

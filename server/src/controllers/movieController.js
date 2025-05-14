@@ -12,6 +12,7 @@ const cloudinary = require('../config/cloudinary');
  */
 exports.getAllMovies = catchAsync(async (req, res, next) => {
     // Thực hiện query với filtering, sorting, pagination
+    console.log(req.query);
     const features = new APIFeatures(Movie.find(), req.query)
         .filter()
         .sort()
@@ -65,17 +66,22 @@ exports.getMovie = catchAsync(async (req, res, next) => {
  */
 exports.createMovie = catchAsync(async (req, res, next) => {
     // Xử lý URL poster nếu đã có từ middleware
-    if (req.body.posterUrl) {
-        req.body.posterUrl = req.body.posterUrl;
-    }
+    // if (req.body.posterUrl) {
+    //     req.body.posterUrl = req.body.posterUrl;
+    // }
+    //
+    // // Xử lý URL trailer nếu có
+    // if (req.body.trailerUrl) {
+    //     // Có thể thêm logic kiểm tra URL trailer hợp lệ ở đây
+    // }
 
-    // Xử lý URL trailer nếu có
-    if (req.body.trailerUrl) {
-        // Có thể thêm logic kiểm tra URL trailer hợp lệ ở đây
-    }
+    console.log(req.body);
 
     // Tạo phim mới
     const newMovie = await Movie.create(req.body);
+
+    console.log("created done");
+
 
     res.status(201).json({
         status: 'success',
@@ -159,7 +165,7 @@ exports.getNowPlaying = catchAsync(async (req, res, next) => {
 
     const data = await features.query;
 
-    const totalCount = await Movie.countDocuments({...baseQuery, ...features.queryObj});
+    const totalCount = await Movie.countDocuments(features.queryObj);
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const totalPages = Math.ceil(totalCount / limit);
@@ -199,7 +205,7 @@ exports.getComingSoon = catchAsync(async (req, res, next) => {
 
     const data = await features.query;
 
-    const totalCount = await Movie.countDocuments({...baseQuery, ...features.queryObj});
+    const totalCount = await Movie.countDocuments(features.queryObj);
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const totalPages = Math.ceil(totalCount / limit);
@@ -223,29 +229,32 @@ exports.getComingSoon = catchAsync(async (req, res, next) => {
  * @access  Public
  */
 exports.searchMovies = catchAsync(async (req, res, next) => {
-    const { keyword } = req.query;
+    const { query } = req.query;
 
-    if (!keyword) {
+    if (!query) {
         return next(new AppError('Vui lòng nhập từ khóa tìm kiếm', 400));
     }
-
-    const data = await Movie.find({
-        $or: [
-            { title: { $regex: keyword, $options: 'i' } },
-            { director: { $regex: keyword, $options: 'i' } },
-            { cast: { $in: [new RegExp(keyword, 'i')] } },
-            { genre: { $in: [new RegExp(keyword, 'i')] } }
-                    ]
-                });
 
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
+    const searchQuery = {
+        $or: [
+            { title: { $regex: query, $options: 'i' } },
+            { director: { $regex: query, $options: 'i' } },
+            { cast: { $in: [new RegExp(query, 'i')] } },
+            { genre: { $in: [new RegExp(query, 'i')] } }
+        ]
+    };
+
+    const data = await Movie.find(searchQuery)
+        .skip(skip)
+        .limit(limit);
+
     const totalCount = await Movie.countDocuments(searchQuery);
     const totalPages = Math.ceil(totalCount / limit);
 
-    // Trả về kết quả
     res.status(200).json({
         status: 'success',
         data: {
@@ -268,8 +277,11 @@ exports.getTopRated = catchAsync(async (req, res, next) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
+    const baseQuery = { rating: { $gt: 0 } };
+
     const data = await Movie.find({ rating: { $gt: 0 } })
         .sort({ rating: -1 })
+        .skip(skip)
         .limit(limit);
 
     const totalCount = await Movie.countDocuments(baseQuery);
