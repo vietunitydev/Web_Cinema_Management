@@ -16,15 +16,28 @@ exports.getAllUsers = catchAsync(async (req, res, next) => {
         .limitFields()
         .paginate();
 
-    const users = await features.query;
+    const data = await features.query;
 
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const totalCount = await User.countDocuments(features.queryObj);
+    const totalPages = Math.ceil(totalCount / limit);
+
+    // Trả về kết quả
     res.status(200).json({
         status: 'success',
-        results: users.length,
         data: {
-            users
+            data,
+            totalCount,
+            page,
+            limit,
+            totalPages
         }
     });
+
+
 });
 
 /**
