@@ -152,6 +152,7 @@ export interface PaginatedResponse<T> {
     page: number;
     limit: number;
     totalPages: number;
+    status: string;
 }
 
 export interface ApiResponse<T> {
@@ -159,4 +160,5 @@ export interface ApiResponse<T> {
     data?: T;
     message?: string;
     error?: string;
+    status: string;
 }

@@ -18,14 +18,22 @@ exports.getAllMovies = catchAsync(async (req, res, next) => {
         .limitFields()
         .paginate();
 
-    const movies = await features.query;
+    const data = await features.query;
+
+    const totalCount = await Movie.countDocuments(features.queryObj);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const totalPages = Math.ceil(totalCount / limit);
 
     // Trả về kết quả
     res.status(200).json({
         status: 'success',
-        results: movies.length,
         data: {
-            movies
+            data,
+            totalCount,
+            page,
+            limit,
+            totalPages
         }
     });
 });
@@ -149,13 +157,22 @@ exports.getNowPlaying = catchAsync(async (req, res, next) => {
         .limitFields()
         .paginate();
 
-    const movies = await features.query;
+    const data = await features.query;
 
+    const totalCount = await Movie.countDocuments({...baseQuery, ...features.queryObj});
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const totalPages = Math.ceil(totalCount / limit);
+
+    // Trả về kết quả
     res.status(200).json({
         status: 'success',
-        results: movies.length,
         data: {
-            movies
+            data,
+            totalCount,
+            page,
+            limit,
+            totalPages
         }
     });
 });
@@ -180,13 +197,22 @@ exports.getComingSoon = catchAsync(async (req, res, next) => {
         .limitFields()
         .paginate();
 
-    const movies = await features.query;
+    const data = await features.query;
 
+    const totalCount = await Movie.countDocuments({...baseQuery, ...features.queryObj});
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const totalPages = Math.ceil(totalCount / limit);
+
+    // Trả về kết quả
     res.status(200).json({
         status: 'success',
-        results: movies.length,
         data: {
-            movies
+            data,
+            totalCount,
+            page,
+            limit,
+            totalPages
         }
     });
 });
@@ -203,7 +229,7 @@ exports.searchMovies = catchAsync(async (req, res, next) => {
         return next(new AppError('Vui lòng nhập từ khóa tìm kiếm', 400));
     }
 
-    const movies = await Movie.find({
+    const data = await Movie.find({
         $or: [
             { title: { $regex: keyword, $options: 'i' } },
             { director: { $regex: keyword, $options: 'i' } },
@@ -212,11 +238,22 @@ exports.searchMovies = catchAsync(async (req, res, next) => {
                     ]
                 });
 
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const totalCount = await Movie.countDocuments(searchQuery);
+    const totalPages = Math.ceil(totalCount / limit);
+
+    // Trả về kết quả
     res.status(200).json({
         status: 'success',
-        results: movies.length,
         data: {
-            movies
+            data,
+            totalCount,
+            page,
+            limit,
+            totalPages
         }
     });
 });
@@ -227,17 +264,25 @@ exports.searchMovies = catchAsync(async (req, res, next) => {
  * @access  Public
  */
 exports.getTopRated = catchAsync(async (req, res, next) => {
-    const limit = req.query.limit * 1 || 10;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
 
-    const movies = await Movie.find({ rating: { $gt: 0 } })
+    const data = await Movie.find({ rating: { $gt: 0 } })
         .sort({ rating: -1 })
         .limit(limit);
 
+    const totalCount = await Movie.countDocuments(baseQuery);
+    const totalPages = Math.ceil(totalCount / limit);
+
     res.status(200).json({
         status: 'success',
-        results: movies.length,
         data: {
-            movies
+            data,
+            totalCount,
+            page,
+            limit,
+            totalPages
         }
     });
 });

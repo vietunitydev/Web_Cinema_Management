@@ -73,7 +73,7 @@ const Movies: React.FC = () => {
                         setGenres(uniqueGenres);
                     }
                 }
-            } catch (err) {
+            } catch{
                 setError('Không thể tải danh sách phim. Vui lòng thử lại sau.');
             } finally {
                 setLoading(false);
