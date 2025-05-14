@@ -55,8 +55,8 @@ const Reports: React.FC = () => {
                         response = await bookingService.getCinemaStats(dateRange.startDate, dateRange.endDate);
                         break;
                 }
-                setReportData(response.data);
-            } catch (err) {
+                setReportData(response.data ?? null);
+            } catch{
                 setError('Không thể tải dữ liệu báo cáo. Vui lòng thử lại sau.');
             } finally {
                 setLoading(false);
@@ -68,6 +68,7 @@ const Reports: React.FC = () => {
 
     // Format currency
     const formatCurrency = (amount: number) => {
+        if (typeof amount !== 'number') return '0 đ';
         return amount.toLocaleString('vi-VN') + ' đ';
     };
 
