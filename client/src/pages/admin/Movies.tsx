@@ -54,7 +54,7 @@ const Movies: React.FC = () => {
                         setGenres(uniqueGenres);
                     }
                 }
-            } catch (err) {
+            } catch {
                 setError('Không thể tải danh sách phim. Vui lòng thử lại sau.');
             } finally {
                 setLoading(false);
@@ -112,7 +112,7 @@ const Movies: React.FC = () => {
                             // Remove the movie from state
                             setMovies(movies.filter(movie => movie._id !== id));
                             toast.success('Xóa phim thành công');
-                        } catch (err) {
+                        } catch {
                             toast.error('Lỗi khi xóa phim');
                         } finally {
                             setActionLoading(false);
