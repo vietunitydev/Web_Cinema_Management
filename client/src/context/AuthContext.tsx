@@ -28,18 +28,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             if (storedUser) {
                 try {
                     setUser(JSON.parse(storedUser));
-                } catch (err) {
+                    // setIsLoading(false);
+                    // return;
+                } catch {
                     localStorage.removeItem('user');
                 }
             }
 
             try {
-                const { data } = await authService.getCurrentUser();
-                if (data) {
-                    setUser(data);
-                    localStorage.setItem('user', JSON.stringify(data));
+                const response = await authService.getCurrentUser();
+                // console.log(response.data)
+                const user = response.data;
+                if (user) {
+                    setUser(user);
+                    localStorage.setItem('user', JSON.stringify(user));
                 }
-            } catch (err) {
+            } catch {
                 // Clear local storage if token is invalid
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
@@ -55,9 +59,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setIsLoading(true);
         setError(null);
         try {
-            console.log("login")
             const response = await authService.login(email, password);
             const { user, token } = response.data!;
+
             setUser(user);
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));

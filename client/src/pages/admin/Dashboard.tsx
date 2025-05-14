@@ -160,6 +160,7 @@ const Dashboard: React.FC = () => {
 
     // Format currency
     const formatCurrency = (amount: number) => {
+        if (typeof amount !== 'number') return '0 đ';
         return amount.toLocaleString('vi-VN') + ' đ';
     };
 

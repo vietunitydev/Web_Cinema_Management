@@ -34,9 +34,9 @@ const sendToken = (user, statusCode, res) => {
     // Trả về response
     res.status(statusCode).json({
         status: 'success',
-        token,
         data: {
             user,
+            token,
         },
     });
 };
