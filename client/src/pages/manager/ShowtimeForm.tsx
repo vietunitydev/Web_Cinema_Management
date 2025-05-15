@@ -61,6 +61,7 @@ const ShowtimeForm: React.FC = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
+
                 const moviesResponse = await movieService.getAllMovies();
                 setMovies(moviesResponse.data?.data || []);
                 setError((prev) => ({ ...prev, movies: null }));
@@ -111,6 +112,7 @@ const ShowtimeForm: React.FC = () => {
             setLoading((prev) => ({ ...prev, formData: true }));
             try {
                 const response = await showtimeService.getShowtimeById(id!);
+                console.log(response);
                 const showtime = response.data;
 
                 if (!showtime) {
