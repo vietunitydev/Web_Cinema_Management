@@ -12,7 +12,6 @@ const cloudinary = require('../config/cloudinary');
  */
 exports.getAllMovies = catchAsync(async (req, res, next) => {
     // Thực hiện query với filtering, sorting, pagination
-    console.log(req.query);
     const features = new APIFeatures(Movie.find(), req.query)
         .filter()
         .sort()
