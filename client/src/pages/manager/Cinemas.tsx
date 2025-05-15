@@ -205,7 +205,7 @@ const Cinemas: React.FC = () => {
                                             >
                                                 Xóa
                                             </button>
-                                            <Link to={`/manager/cinemas/${cinema._id}/halls`}>
+                                            <Link to={`/manager/halls`}>
                                                 <button className="text-blue-600 hover:text-blue-900">
                                                     Phòng chiếu
                                                 </button>

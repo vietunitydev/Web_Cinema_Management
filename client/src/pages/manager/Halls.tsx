@@ -28,6 +28,7 @@ const Halls: React.FC = () => {
                 const response = await cinemaService.getAllCinemas();
                 const cinemasList = response.data?.data || [];
                 setCinemas(cinemasList);
+                console.log(cinemasList);
 
                 // If cinemas exist, select the first one by default
                 if (cinemasList.length > 0) {
@@ -35,7 +36,7 @@ const Halls: React.FC = () => {
                 }
 
                 setError((prev) => ({ ...prev, cinemas: null }));
-            } catch (err) {
+            } catch{
                 setError((prev) => ({ ...prev, cinemas: 'Không thể tải danh sách rạp' }));
             } finally {
                 setLoading((prev) => ({ ...prev, cinemas: false }));
@@ -57,9 +58,10 @@ const Halls: React.FC = () => {
 
             try {
                 const response = await cinemaService.getCinemaHalls(selectedCinema._id);
+                console.log(response);
                 setHalls(response.data || []);
                 setError((prev) => ({ ...prev, halls: null }));
-            } catch (err) {
+            } catch {
                 setError((prev) => ({ ...prev, halls: 'Không thể tải danh sách phòng chiếu' }));
             } finally {
                 setLoading((prev) => ({ ...prev, halls: false }));
@@ -88,7 +90,7 @@ const Halls: React.FC = () => {
                 // Remove the hall from the list
                 setHalls(halls.filter((hall) => hall.hallId !== hallId));
                 toast.success('Xóa phòng chiếu thành công');
-            } catch (err) {
+            } catch {
                 toast.error('Không thể xóa phòng chiếu. Vui lòng thử lại.');
             } finally {
                 setLoading((prev) => ({ ...prev, action: false }));

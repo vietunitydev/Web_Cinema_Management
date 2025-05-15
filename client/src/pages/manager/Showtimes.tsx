@@ -12,6 +12,12 @@ import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { toast } from 'react-toastify';
 
+interface ErrorState{
+    showtimes: string | null,
+    movies: string | null,
+    cinemas: string | null,
+}
+
 const Showtimes: React.FC = () => {
     const [showtimes, setShowtimes] = useState<Showtime[]>([]);
     const [movies, setMovies] = useState<Movie[]>([]);
@@ -25,7 +31,7 @@ const Showtimes: React.FC = () => {
         cinemas: true,
         action: false,
     });
-    const [error, setError] = useState({
+    const [error, setError] = useState<ErrorState>({
         showtimes: null,
         movies: null,
         cinemas: null,
@@ -52,7 +58,7 @@ const Showtimes: React.FC = () => {
                 setTotalItems(response.data?.totalCount || 0);
                 setTotalPages(response.data?.totalPages || 1);
                 setError((prev) => ({ ...prev, showtimes: null }));
-            } catch (err) {
+            } catch {
                 setError((prev) => ({ ...prev, showtimes: 'Không thể tải danh sách lịch chiếu' }));
             } finally {
                 setLoading((prev) => ({ ...prev, showtimes: false }));
@@ -65,7 +71,7 @@ const Showtimes: React.FC = () => {
                 const response = await movieService.getAllMovies();
                 setMovies(response.data?.data || []);
                 setError((prev) => ({ ...prev, movies: null }));
-            } catch (err) {
+            } catch {
                 setError((prev) => ({ ...prev, movies: 'Không thể tải danh sách phim' }));
             } finally {
                 setLoading((prev) => ({ ...prev, movies: false }));
@@ -78,7 +84,7 @@ const Showtimes: React.FC = () => {
                 const response = await cinemaService.getAllCinemas();
                 setCinemas(response.data?.data || []);
                 setError((prev) => ({ ...prev, cinemas: null }));
-            } catch (err) {
+            } catch {
                 setError((prev) => ({ ...prev, cinemas: 'Không thể tải danh sách rạp' }));
             } finally {
                 setLoading((prev) => ({ ...prev, cinemas: false }));
@@ -127,7 +133,7 @@ const Showtimes: React.FC = () => {
                     )
                 );
                 toast.success('Lịch chiếu đã được hủy thành công');
-            } catch (err) {
+            } catch {
                 toast.error('Không thể hủy lịch chiếu. Vui lòng thử lại.');
             } finally {
                 setLoading((prev) => ({ ...prev, action: false }));
@@ -144,7 +150,7 @@ const Showtimes: React.FC = () => {
                 // Remove the showtime from the list
                 setShowtimes(showtimes.filter((showtime) => showtime._id !== id));
                 toast.success('Lịch chiếu đã được xóa thành công');
-            } catch (err) {
+            } catch {
                 toast.error('Không thể xóa lịch chiếu. Vui lòng thử lại.');
             } finally {
                 setLoading((prev) => ({ ...prev, action: false }));

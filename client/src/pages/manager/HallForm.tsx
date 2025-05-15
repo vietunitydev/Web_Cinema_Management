@@ -1,4 +1,3 @@
-// src/pages/manager/HallForm.tsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { cinemaService } from '../../services/cinemaService';
@@ -7,31 +6,31 @@ import Button from '../../components/common/Button';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { toast } from 'react-toastify';
 
-interface ErrorState
-{
-    cinemas: string | null,
-    hall: string | null,
-    submit: string | null,
+interface ErrorState {
+    cinemas: string | null;
+    hall: string | null;
+    submit: string | null;
 }
+
 const HallForm: React.FC = () => {
-    const { id } = useParams<{ id: string }>(); // Hall ID if editing
+    const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const isEditing = !!id;
 
-    // Form data
-    const [formData, setFormData] = useState<Omit<Hall, 'hallId'> & { cinemaId: string }>({
+    // Form data with hallId included
+    const [formData, setFormData] = useState<Hall & { cinemaId: string }>({
         cinemaId: '',
+        hallId: '',
         name: '',
         capacity: 0,
         type: 'Regular',
         seatingArrangement: {
             rows: 0,
             seatsPerRow: 0,
-            format: [], // Will be generated based on rows and seatsPerRow
+            format: [],
         },
     });
 
-    // State for options and loading
     const [cinemas, setCinemas] = useState<Cinema[]>([]);
     const [selectedCinema, setSelectedCinema] = useState<Cinema | null>(null);
     const [loading, setLoading] = useState({
@@ -45,7 +44,7 @@ const HallForm: React.FC = () => {
         submit: null,
     });
 
-    // Fetch cinemas when component mounts
+    // Fetch cinemas
     useEffect(() => {
         const fetchCinemas = async () => {
             try {
@@ -53,7 +52,6 @@ const HallForm: React.FC = () => {
                 const cinemasList = response.data?.data || [];
                 setCinemas(cinemasList);
 
-                // If not editing, select the first cinema by default
                 if (cinemasList.length > 0 && !isEditing) {
                     setSelectedCinema(cinemasList[0]);
                     setFormData((prev) => ({ ...prev, cinemaId: cinemasList[0]._id }));
@@ -76,8 +74,6 @@ const HallForm: React.FC = () => {
             if (!isEditing) return;
 
             try {
-                // We need to find which cinema this hall belongs to
-                // This requires checking each cinema's halls
                 let foundHall: Hall | null = null;
                 let foundCinema: Cinema | null = null;
 
@@ -93,7 +89,6 @@ const HallForm: React.FC = () => {
                             break;
                         }
                     } catch {
-                        // Continue to the next cinema
                         continue;
                     }
                 }
@@ -102,6 +97,7 @@ const HallForm: React.FC = () => {
                     setSelectedCinema(foundCinema);
                     setFormData({
                         cinemaId: foundCinema._id,
+                        hallId: foundHall.hallId,
                         name: foundHall.name,
                         capacity: foundHall.capacity,
                         type: foundHall.type,
@@ -118,13 +114,11 @@ const HallForm: React.FC = () => {
             }
         };
 
-        // Only fetch if we have cinemas loaded
         if (cinemas.length > 0) {
             fetchHall();
         }
     }, [id, isEditing, cinemas]);
 
-    // Handle cinema selection change
     const handleCinemaChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const cinemaId = e.target.value;
         const cinema = cinemas.find((c) => c._id === cinemaId) || null;
@@ -132,93 +126,62 @@ const HallForm: React.FC = () => {
         setFormData((prev) => ({ ...prev, cinemaId }));
     };
 
-    // Handle form field changes
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
 
         if (name === 'rows' || name === 'seatsPerRow') {
-            // Update seating arrangement
             const intValue = parseInt(value) || 0;
-            setFormData({
-                ...formData,
+            setFormData((prev) => ({
+                ...prev,
                 seatingArrangement: {
-                    ...formData.seatingArrangement,
+                    ...prev.seatingArrangement,
                     [name]: intValue,
-                    // Format will be updated later
                 },
-            });
-
-            // Update capacity based on rows x seatsPerRow
-            if (name === 'rows') {
-                setFormData((prev) => ({
-                    ...prev,
-                    capacity: intValue * prev.seatingArrangement.seatsPerRow,
-                    seatingArrangement: {
-                        ...prev.seatingArrangement,
-                        rows: intValue,
-                    },
-                }));
-            } else if (name === 'seatsPerRow') {
-                setFormData((prev) => ({
-                    ...prev,
-                    capacity: prev.seatingArrangement.rows * intValue,
-                    seatingArrangement: {
-                        ...prev.seatingArrangement,
-                        seatsPerRow: intValue,
-                    },
-                }));
-            }
+                capacity: name === 'rows'
+                    ? intValue * prev.seatingArrangement.seatsPerRow
+                    : prev.seatingArrangement.rows * intValue,
+            }));
         } else {
-            // Handle other fields
-            setFormData({
-                ...formData,
+            setFormData((prev) => ({
+                ...prev,
                 [name]: name === 'capacity' ? parseInt(value) || 0 : value,
-            });
+            }));
         }
     };
 
-    // Generate seating format based on rows and seats per row
     const generateSeatingFormat = () => {
         const { rows, seatsPerRow } = formData.seatingArrangement;
         const format: string[][] = [];
 
-        // Generate rows (A, B, C, ...)
         for (let i = 0; i < rows; i++) {
-            const rowLabel = String.fromCharCode(65 + i); // A=65, B=66, ...
+            const rowLabel = String.fromCharCode(65 + i);
             const row: string[] = [];
-
-            // Generate seats (A1, A2, A3, ...)
             for (let j = 1; j <= seatsPerRow; j++) {
                 row.push(`${rowLabel}${j}`);
             }
-
             format.push(row);
         }
 
         return format;
     };
 
-    // Handle form submission
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Validate the form
-        if (!formData.cinemaId || !formData.name || formData.capacity <= 0) {
+        if (!formData.cinemaId || !formData.hallId || !formData.name || formData.capacity <= 0) {
             toast.error('Vui lòng điền đầy đủ thông tin bắt buộc');
             return;
         }
 
-        // Validate seating arrangement
         if (formData.seatingArrangement.rows <= 0 || formData.seatingArrangement.seatsPerRow <= 0) {
             toast.error('Vui lòng điền thông tin sơ đồ ghế');
             return;
         }
 
-        // Generate seating format
         const format = generateSeatingFormat();
 
-        // Prepare hall data
-        const hallData: Omit<Hall, 'hallId'> = {
+        const hallData: Hall = {
+            hallId: formData.hallId,
             name: formData.name,
             capacity: formData.capacity,
             type: formData.type,
@@ -233,11 +196,9 @@ const HallForm: React.FC = () => {
 
         try {
             if (isEditing) {
-                // Update existing hall
                 await cinemaService.updateHall(formData.cinemaId, id!, hallData);
                 toast.success('Cập nhật phòng chiếu thành công');
             } else {
-                // Create new hall
                 await cinemaService.createHall(formData.cinemaId, hallData);
                 toast.success('Tạo phòng chiếu mới thành công');
             }
@@ -251,7 +212,6 @@ const HallForm: React.FC = () => {
         }
     };
 
-    // Show loading when initially fetching data
     if ((isEditing && loading.hall) || loading.cinemas) {
         return (
             <div className="flex justify-center items-center h-full p-8">
@@ -260,7 +220,6 @@ const HallForm: React.FC = () => {
         );
     }
 
-    // Show error if couldn't fetch hall data
     if (isEditing && error.hall) {
         return (
             <div className="p-8 text-center">
@@ -284,10 +243,9 @@ const HallForm: React.FC = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                {/* Cinema Selection */}
                 <div className="mb-6">
                     <label htmlFor="cinemaId" className="block text-sm font-medium text-gray-700 mb-1">
-                        Rạp <span className="text-red-500">*</span>
+                        R gomạp <span className="text-red-500">*</span>
                     </label>
                     {error.cinemas ? (
                         <div className="text-red-500 text-sm">{error.cinemas}</div>
@@ -303,7 +261,7 @@ const HallForm: React.FC = () => {
                             onChange={handleCinemaChange}
                             className="w-full rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-primary"
                             required
-                            disabled={isEditing} // Cannot change cinema if editing
+                            disabled={isEditing}
                         >
                             <option value="">Chọn rạp</option>
                             {cinemas.map((cinema) => (
@@ -315,8 +273,23 @@ const HallForm: React.FC = () => {
                     )}
                 </div>
 
-                {/* Basic Hall Information */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label htmlFor="hallId" className="block text-sm font-medium text-gray-700 mb-1">
+                            Mã phòng chiếu <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            id="hallId"
+                            name="hallId"
+                            value={formData.hallId}
+                            onChange={handleChange}
+                            className="w-full rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                            placeholder="Ví dụ: HALL001"
+                            required
+                            disabled={isEditing}
+                        />
+                    </div>
                     <div>
                         <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
                             Tên phòng <span className="text-red-500">*</span>
@@ -352,7 +325,6 @@ const HallForm: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Seating Arrangement */}
                 <div className="mb-6">
                     <h3 className="text-lg font-medium text-gray-900 mb-3">Sơ đồ ghế</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -408,7 +380,6 @@ const HallForm: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Visual Seating Preview */}
                 {formData.seatingArrangement.rows > 0 && formData.seatingArrangement.seatsPerRow > 0 && (
                     <div className="mb-6">
                         <h3 className="text-lg font-medium text-gray-900 mb-3">Bản xem trước sơ đồ</h3>
@@ -444,14 +415,12 @@ const HallForm: React.FC = () => {
                     </div>
                 )}
 
-                {/* Error message */}
                 {error.submit && (
                     <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-md">
                         {error.submit}
                     </div>
                 )}
 
-                {/* Form actions */}
                 <div className="flex justify-end space-x-4">
                     <Button
                         variant="outline"
