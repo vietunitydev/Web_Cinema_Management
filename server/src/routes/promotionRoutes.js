@@ -9,7 +9,7 @@ const router = express.Router();
 // Routes công khai
 router.get('/', promotionController.getAllPromotions);
 router.get('/permission', isLoggedIn, promotionController.getAllPromotions);
-router.get('/:id', promotionController.getPromotion);
+router.get('/:id', isLoggedIn, promotionController.getPromotion);
 
 // Routes cần đăng nhập
 router.use(authMiddleware.protect);
