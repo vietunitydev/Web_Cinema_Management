@@ -31,6 +31,8 @@ import Promotions from './pages/customer/Promotions';
 
 // Manager Pages
 import ManagerDashboard from './pages/manager/Dashboard';
+import ManagerCinemas from './pages/manager/Cinemas';
+import ManagerCinemaForm from './pages/manager/CinemaForm.tsx';
 import ManagerShowtimes from './pages/manager/Showtimes';
 import ManagerShowtimeForm from './pages/manager/ShowtimeForm';
 import ManagerHalls from './pages/manager/Halls';
@@ -213,6 +215,36 @@ export const routes: RouteObject[] = [
             <ProtectedRoute requiredRole="manager">
                 <ManagerLayout>
                     <ManagerDashboard />
+                </ManagerLayout>
+            </ProtectedRoute>
+        ),
+    },
+    {
+        path: '/manager/cinemas',
+        element: (
+            <ProtectedRoute requiredRole="manager">
+                <ManagerLayout>
+                    <ManagerCinemas />
+                </ManagerLayout>
+            </ProtectedRoute>
+        ),
+    },
+    {
+        path: '/manager/cinemas/create',
+        element: (
+            <ProtectedRoute requiredRole="manager">
+                <ManagerLayout>
+                    <ManagerCinemaForm />
+                </ManagerLayout>
+            </ProtectedRoute>
+        ),
+    },
+    {
+        path: '/manager/cinemas/:id/edit',
+        element: (
+            <ProtectedRoute requiredRole="manager">
+                <ManagerLayout>
+                    <ManagerCinemaForm />
                 </ManagerLayout>
             </ProtectedRoute>
         ),
