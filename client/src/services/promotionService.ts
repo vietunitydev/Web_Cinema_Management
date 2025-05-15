@@ -1,6 +1,6 @@
 // src/services/promotionService.ts
 import api from './api';
-import type { ApiResponse, PaginatedResponse, Promotion } from '../types/models';
+import type {ApiResponse, PaginatedResponse, Promotion} from '../types/models';
 
 export interface PromotionCheckResult {
     valid: boolean;
@@ -12,6 +12,11 @@ export interface PromotionCheckResult {
 export const promotionService = {
     getAllPromotions: (page = 1, limit = 10) =>
         api.get<ApiResponse<PaginatedResponse<Promotion>>>('/promotions', {
+            params: { page, limit }
+        }),
+
+    getAllPromotionsWithRole: (page = 1, limit = 10) =>
+        api.get<ApiResponse<PaginatedResponse<Promotion>>>('/promotions/permission', {
             params: { page, limit }
         }),
 

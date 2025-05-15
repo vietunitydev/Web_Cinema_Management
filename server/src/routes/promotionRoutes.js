@@ -2,11 +2,13 @@ const express = require('express');
 const promotionController = require('../controllers/promotionController');
 const authMiddleware = require('../middlewares/auth');
 const { promotionValidation, validate } = require('../middlewares/validate');
+const {isLoggedIn} = require("../middlewares/auth");
 
 const router = express.Router();
 
 // Routes công khai
 router.get('/', promotionController.getAllPromotions);
+router.get('/permission', isLoggedIn, promotionController.getAllPromotions);
 router.get('/:id', promotionController.getPromotion);
 
 // Routes cần đăng nhập

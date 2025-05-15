@@ -31,7 +31,8 @@ const Promotions: React.FC = () => {
             setError(null);
 
             try {
-                const response = await promotionService.getAllPromotions(currentPage, itemsPerPage);
+                const response = await promotionService.getAllPromotionsWithRole(currentPage, itemsPerPage);
+                console.log(response);
 
                 // Update state with fetched data
                 if (response.data) {

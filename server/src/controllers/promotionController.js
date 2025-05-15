@@ -21,6 +21,8 @@ exports.getAllPromotions = catchAsync(async (req, res, next) => {
         filter.status = 'active';
     }
 
+    // console.log(req.user.role)
+
     const features = new APIFeatures(Promotion.find(filter), req.query)
         .filter()
         .sort()
@@ -31,7 +33,6 @@ exports.getAllPromotions = catchAsync(async (req, res, next) => {
 
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
 
     const totalCount = await Promotion.countDocuments(features.queryObj);
     const totalPages = Math.ceil(totalCount / limit);
