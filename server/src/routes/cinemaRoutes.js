@@ -3,11 +3,12 @@ const cinemaController = require('../controllers/cinemaController');
 const showtimeController = require('../controllers/showtimeController');
 const authMiddleware = require('../middlewares/auth');
 const { cinemaValidation, hallValidation, validate } = require('../middlewares/validate');
+const {isLoggedIn} = require("../middlewares/auth");
 
 const router = express.Router();
 
 // Routes công khai
-router.get('/', cinemaController.getAllCinemas);
+router.get('/', isLoggedIn, cinemaController.getAllCinemas);
 router.get('/city/:city', cinemaController.getCinemasByCity);
 router.get('/:id', cinemaController.getCinema);
 router.get('/:id/halls', cinemaController.getCinemaHalls);

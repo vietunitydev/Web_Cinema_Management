@@ -50,6 +50,7 @@ export interface Cinema {
     openTime: string;
     closeTime: string;
     halls: Hall[];
+    isActive: boolean;
 }
 
 export interface Hall {
