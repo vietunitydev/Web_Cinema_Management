@@ -12,7 +12,7 @@ import { toast } from 'react-toastify';
 interface UserFormValues {
     username: string;
     email: string;
-    password: string;
+    passwordHash: string;
     confirmPassword: string;
     fullName: string;
     phone: string;
@@ -58,7 +58,7 @@ const UserForm: React.FC = () => {
         initialValues: {
             username: '',
             email: '',
-            password: '',
+            passwordHash: '',
             confirmPassword: '',
             fullName: '',
             phone: '',
@@ -75,7 +75,7 @@ const UserForm: React.FC = () => {
             email: Yup.string()
                 .email('Email không hợp lệ')
                 .required('Email là bắt buộc'),
-            password: Yup.string()
+            passwordHash: Yup.string()
                 .min(6, 'Mật khẩu phải có ít nhất 6 ký tự')
                 .when('$isEditing', {
                     is: false,
@@ -83,8 +83,8 @@ const UserForm: React.FC = () => {
                     otherwise: (schema) => schema,
                 }),
             confirmPassword: Yup.string()
-                .oneOf([Yup.ref('password')], 'Mật khẩu xác nhận không khớp')
-                .when('password', {
+                .oneOf([Yup.ref('passwordHash')], 'Mật khẩu xác nhận không khớp')
+                .when('passwordHash', {
                     is: (val: string) => val && val.length > 0,
                     then: (schema) => schema.required('Xác nhận mật khẩu là bắt buộc'),
                 }),
@@ -108,8 +108,8 @@ const UserForm: React.FC = () => {
                 const userData: Partial<UserFormValues> = { ...values };
 
                 // Remove password fields if empty
-                if (isEditing && !values.password) {
-                    delete userData.password;
+                if (isEditing && !values.passwordHash) {
+                    delete userData.passwordHash;
                     delete userData.confirmPassword;
                 }
 
@@ -120,6 +120,7 @@ const UserForm: React.FC = () => {
                     await userService.updateUser(id, userData);
                     toast.success('Cập nhật người dùng thành công');
                 } else {
+                    // console.log(userData);
                     await userService.createUser(userData as any); // Type cast needed here
                     toast.success('Thêm người dùng mới thành công');
                 }
@@ -140,7 +141,7 @@ const UserForm: React.FC = () => {
             formik.setValues({
                 username: user.username,
                 email: user.email,
-                password: '',
+                passwordHash: '',
                 confirmPassword: '',
                 fullName: user.fullName,
                 phone: user.phone || '',
@@ -235,22 +236,22 @@ const UserForm: React.FC = () => {
 
                     {/* Mật khẩu */}
                     <div>
-                        <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                        <label htmlFor="passwordHash" className="block text-sm font-medium text-gray-700 mb-1">
                             Mật khẩu {!isEditing && <span className="text-red-500">*</span>}
                         </label>
                         <input
                             type="password"
-                            id="password"
+                            id="passwordHash"
                             className={`w-full rounded-md border ${
-                                formik.touched.password && formik.errors.password
+                                formik.touched.passwordHash && formik.errors.passwordHash
                                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                                     : 'border-gray-300 focus:ring-primary focus:border-primary'
                             } p-2 focus:outline-none focus:ring-2`}
                             placeholder={isEditing ? "Để trống nếu không muốn đổi mật khẩu" : "Nhập mật khẩu"}
-                            {...formik.getFieldProps('password')}
+                            {...formik.getFieldProps('passwordHash')}
                         />
-                        {formik.touched.password && formik.errors.password && (
-                            <p className="mt-1 text-sm text-red-600">{formik.errors.password}</p>
+                        {formik.touched.passwordHash && formik.errors.passwordHash && (
+                            <p className="mt-1 text-sm text-red-600">{formik.errors.passwordHash}</p>
                         )}
                     </div>
 
