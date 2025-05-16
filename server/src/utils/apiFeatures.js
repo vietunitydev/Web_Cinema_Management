@@ -11,6 +11,10 @@ class APIFeatures {
         const excludedFields = ['page', 'sort', 'limit', 'fields'];
         excludedFields.forEach(el => delete queryObj[el]);
 
+        if (queryObj.title) {
+            queryObj.title = { $regex: queryObj.title, $options: 'i' };
+        }
+
         Object.keys(queryObj).forEach(key => {
             if (queryObj[key] === '') {
                 delete queryObj[key];
