@@ -1,4 +1,3 @@
-// src/pages/admin/UserForm.tsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useFormik } from 'formik';
@@ -234,47 +233,59 @@ const UserForm: React.FC = () => {
                         )}
                     </div>
 
-                    {/* Mật khẩu */}
-                    <div>
-                        <label htmlFor="passwordHash" className="block text-sm font-medium text-gray-700 mb-1">
-                            Mật khẩu {!isEditing && <span className="text-red-500">*</span>}
-                        </label>
-                        <input
-                            type="password"
-                            id="passwordHash"
-                            className={`w-full rounded-md border ${
-                                formik.touched.passwordHash && formik.errors.passwordHash
-                                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                                    : 'border-gray-300 focus:ring-primary focus:border-primary'
-                            } p-2 focus:outline-none focus:ring-2`}
-                            placeholder={isEditing ? "Để trống nếu không muốn đổi mật khẩu" : "Nhập mật khẩu"}
-                            {...formik.getFieldProps('passwordHash')}
-                        />
-                        {formik.touched.passwordHash && formik.errors.passwordHash && (
-                            <p className="mt-1 text-sm text-red-600">{formik.errors.passwordHash}</p>
-                        )}
-                    </div>
+                    {/* Mật khẩu - chỉ hiển thị khi tạo mới */}
+                    {!isEditing && (
+                        <>
+                            <div>
+                                <label htmlFor="passwordHash" className="block text-sm font-medium text-gray-700 mb-1">
+                                    Mật khẩu <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="password"
+                                    id="passwordHash"
+                                    className={`w-full rounded-md border ${
+                                        formik.touched.passwordHash && formik.errors.passwordHash
+                                            ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                                            : 'border-gray-300 focus:ring-primary focus:border-primary'
+                                    } p-2 focus:outline-none focus:ring-2`}
+                                    placeholder="Nhập mật khẩu"
+                                    {...formik.getFieldProps('passwordHash')}
+                                />
+                                {formik.touched.passwordHash && formik.errors.passwordHash && (
+                                    <p className="mt-1 text-sm text-red-600">{formik.errors.passwordHash}</p>
+                                )}
+                            </div>
 
-                    {/* Xác nhận mật khẩu */}
-                    <div>
-                        <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                            Xác nhận mật khẩu {!isEditing && <span className="text-red-500">*</span>}
-                        </label>
-                        <input
-                            type="password"
-                            id="confirmPassword"
-                            className={`w-full rounded-md border ${
-                                formik.touched.confirmPassword && formik.errors.confirmPassword
-                                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                                    : 'border-gray-300 focus:ring-primary focus:border-primary'
-                            } p-2 focus:outline-none focus:ring-2`}
-                            placeholder="Nhập lại mật khẩu"
-                            {...formik.getFieldProps('confirmPassword')}
-                        />
-                        {formik.touched.confirmPassword && formik.errors.confirmPassword && (
-                            <p className="mt-1 text-sm text-red-600">{formik.errors.confirmPassword}</p>
-                        )}
-                    </div>
+                            {/* Xác nhận mật khẩu - chỉ hiển thị khi tạo mới */}
+                            <div>
+                                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                                    Xác nhận mật khẩu <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="password"
+                                    id="confirmPassword"
+                                    className={`w-full rounded-md border ${
+                                        formik.touched.confirmPassword && formik.errors.confirmPassword
+                                            ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                                            : 'border-gray-300 focus:ring-primary focus:border-primary'
+                                    } p-2 focus:outline-none focus:ring-2`}
+                                    placeholder="Nhập lại mật khẩu"
+                                    {...formik.getFieldProps('confirmPassword')}
+                                />
+                                {formik.touched.confirmPassword && formik.errors.confirmPassword && (
+                                    <p className="mt-1 text-sm text-red-600">{formik.errors.confirmPassword}</p>
+                                )}
+                            </div>
+                        </>
+                    )}
+
+                    {/* Thông báo hướng dẫn về việc không thể đổi mật khẩu */}
+                    {isEditing && (
+                        <div className="md:col-span-2 bg-blue-50 p-4 rounded-md text-blue-800 text-sm">
+                            <p className="font-medium">Lưu ý:</p>
+                            <p>Admin không thể thay đổi mật khẩu của người dùng. Người dùng chỉ có thể thay đổi mật khẩu của chính họ thông qua tính năng "Đổi mật khẩu" sau khi đăng nhập.</p>
+                        </div>
+                    )}
 
                     {/* Thông tin cá nhân */}
                     <div className="md:col-span-2 border-t pt-6 mt-4">
