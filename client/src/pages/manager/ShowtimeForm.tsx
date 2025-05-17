@@ -63,9 +63,6 @@ const ShowtimeForm: React.FC = () => {
             try {
 
                 const moviesResponse = await movieService.getAllMovies();
-                console.log("1");
-
-                console.log(moviesResponse.data);
                 setMovies(moviesResponse.data?.data || []);
                 setError((prev) => ({ ...prev, movies: null }));
             } catch {
@@ -76,9 +73,6 @@ const ShowtimeForm: React.FC = () => {
 
             try {
                 const cinemasResponse = await cinemaService.getAllCinemas();
-                console.log("2");
-                console.log(cinemasResponse.data);
-
                 setCinemas(cinemasResponse.data?.data || []);
                 setError((prev) => ({ ...prev, cinemas: null }));
             } catch {
@@ -100,9 +94,7 @@ const ShowtimeForm: React.FC = () => {
             }
 
             try {
-                const hallsResponse = await cinemaService.getCinemaHalls(formData.cinemaId);
-                console.log("3");
-                console.log(hallsResponse.data);
+                const hallsResponse = await cinemaService.getCinemaHalls(formData.cinemaId._id);
                 setHalls(hallsResponse.data || []);
             } catch{
                 toast.error('Không thể tải danh sách phòng chiếu');
@@ -120,8 +112,6 @@ const ShowtimeForm: React.FC = () => {
             setLoading((prev) => ({ ...prev, formData: true }));
             try {
                 const response = await showtimeService.getShowtimeById(id!);
-                console.log("4");
-                console.log(response);
                 const showtime = response.data;
 
                 if (!showtime) {
