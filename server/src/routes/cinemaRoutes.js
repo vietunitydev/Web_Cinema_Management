@@ -35,6 +35,8 @@ router.route('/:id')
 router.route('/:id/halls')
     .post(hallValidation, validate, cinemaController.addCinemaHall);
 
+router.get('/options', cinemaController.getCinemaOptions);
+
 router.route('/:id/halls/:hallId')
     .patch(cinemaController.updateCinemaHall)
     .delete(cinemaController.deleteCinemaHall);

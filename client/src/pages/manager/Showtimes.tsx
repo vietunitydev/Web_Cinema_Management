@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { showtimeService, type ShowtimeFilters } from '../../services/showtimeService';
 import { movieService } from '../../services/movieService';
 import { cinemaService } from '../../services/cinemaService';
-import type { Showtime, Movie, Cinema } from '../../types/models';
+import type { Movie, Cinema, MovieOption, CinemaOption} from '../../types/models';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import Button from '../../components/common/Button';
 import Pagination from '../../components/common/Pagination';
@@ -12,29 +12,51 @@ import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { toast } from 'react-toastify';
 
-interface ErrorState{
-    showtimes: string | null,
-    movies: string | null,
-    cinemas: string | null,
+interface ErrorState {
+    showtimes: string | null;
+    movieOptions: string | null;
+    cinemaOptions: string | null;
+    details: string | null;
+}
+export interface ShowtimeResponse {
+    _id: string;
+    movieId?: Movie; // Populated reference
+    cinemaId?: Cinema; // Populated reference
+    hallId: string;
+    startTime: string;
+    endTime: string;
+    language: string;
+    subtitles: string[];
+    format: string; // 2D, 3D, IMAX, 4DX
+    price: {
+        regular: number;
+        vip?: number;
+        student?: number;
+    };
+    availableSeats: string[];
+    bookedSeats: string[];
+    status: 'open' | 'canceled' | 'sold_out';
 }
 
 const Showtimes: React.FC = () => {
-    const [showtimes, setShowtimes] = useState<Showtime[]>([]);
-    const [movies, setMovies] = useState<Movie[]>([]);
-    const [cinemas, setCinemas] = useState<Cinema[]>([]);
+    const [showtimes, setShowtimes] = useState<ShowtimeResponse[]>([]);
+    const [movieOptions, setMovieOptions] = useState<MovieOption[]>([]);
+    const [cinemaOptions, setCinemaOptions] = useState<CinemaOption[]>([]);
+
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
     const [loading, setLoading] = useState({
         showtimes: true,
-        movies: true,
-        cinemas: true,
+        options: true,
+        details: false,
         action: false,
     });
     const [error, setError] = useState<ErrorState>({
         showtimes: null,
-        movies: null,
-        cinemas: null,
+        movieOptions: null,
+        cinemaOptions: null,
+        details: null,
     });
     const [filters, setFilters] = useState<ShowtimeFilters>({
         movie: '',
@@ -45,7 +67,40 @@ const Showtimes: React.FC = () => {
         limit: 10,
     });
 
-    // Fetch showtimes, movies, and cinemas
+    // Fetch dữ liệu options cho dropdown
+    useEffect(() => {
+        const fetchOptions = async () => {
+            setLoading((prev) => ({ ...prev, options: true }));
+            try {
+                // Fetch tất cả options cho dropdown (chỉ lấy id và tên)
+                const [movieOptionsResponse, cinemaOptionsResponse] = await Promise.all([
+                    movieService.getMovieOptions(),
+                    cinemaService.getCinemaOptions(),
+                ]);
+
+                setMovieOptions(movieOptionsResponse.data || []);
+                setCinemaOptions(cinemaOptionsResponse.data || []);
+
+                setError((prev) => ({
+                    ...prev,
+                    movieOptions: null,
+                    cinemaOptions: null,
+                }));
+            } catch {
+                setError((prev) => ({
+                    ...prev,
+                    movieOptions: 'Không thể tải danh sách phim',
+                    cinemaOptions: 'Không thể tải danh sách rạp',
+                }));
+            } finally {
+                setLoading((prev) => ({ ...prev, options: false }));
+            }
+        };
+
+        fetchOptions();
+    }, []);
+
+    // Fetch showtimes
     useEffect(() => {
         const fetchShowtimes = async () => {
             setLoading((prev) => ({ ...prev, showtimes: true }));
@@ -54,6 +109,9 @@ const Showtimes: React.FC = () => {
                     ...filters,
                     page: currentPage,
                 });
+
+                // console.log(response);
+
                 setShowtimes(response.data?.data || []);
                 setTotalItems(response.data?.totalCount || 0);
                 setTotalPages(response.data?.totalPages || 1);
@@ -65,35 +123,7 @@ const Showtimes: React.FC = () => {
             }
         };
 
-        const fetchMovies = async () => {
-            setLoading((prev) => ({ ...prev, movies: true }));
-            try {
-                const response = await movieService.getAllMovies();
-                setMovies(response.data?.data || []);
-                setError((prev) => ({ ...prev, movies: null }));
-            } catch {
-                setError((prev) => ({ ...prev, movies: 'Không thể tải danh sách phim' }));
-            } finally {
-                setLoading((prev) => ({ ...prev, movies: false }));
-            }
-        };
-
-        const fetchCinemas = async () => {
-            setLoading((prev) => ({ ...prev, cinemas: true }));
-            try {
-                const response = await cinemaService.getAllCinemas();
-                setCinemas(response.data?.data || []);
-                setError((prev) => ({ ...prev, cinemas: null }));
-            } catch {
-                setError((prev) => ({ ...prev, cinemas: 'Không thể tải danh sách rạp' }));
-            } finally {
-                setLoading((prev) => ({ ...prev, cinemas: false }));
-            }
-        };
-
         fetchShowtimes();
-        fetchMovies();
-        fetchCinemas();
     }, [currentPage, filters]);
 
     // Handle filter changes
@@ -162,17 +192,6 @@ const Showtimes: React.FC = () => {
     const formatDateTime = (dateTimeString: string) => {
         const date = new Date(dateTimeString);
         return format(date, 'HH:mm - dd/MM/yyyy', { locale: vi });
-    };
-
-    // Get movie and cinema names by ID
-    const getMovieName = (movieId: string) => {
-        const movie = movies.find((m) => m._id === movieId);
-        return movie ? movie.title : 'Không xác định';
-    };
-
-    const getCinemaName = (cinemaId: string) => {
-        const cinema = cinemas.find((c) => c._id === cinemaId);
-        return cinema ? cinema.name : 'Không xác định';
     };
 
     // Get status badge class
@@ -282,9 +301,10 @@ const Showtimes: React.FC = () => {
                             value={filters.movie}
                             onChange={(e) => handleFilterChange('movie', e.target.value)}
                             className="w-full rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                            disabled={loading.options}
                         >
                             <option value="">Tất cả phim</option>
-                            {movies.map((movie) => (
+                            {movieOptions.map((movie) => (
                                 <option key={movie._id} value={movie._id}>
                                     {movie.title}
                                 </option>
@@ -303,9 +323,10 @@ const Showtimes: React.FC = () => {
                             value={filters.cinema}
                             onChange={(e) => handleFilterChange('cinema', e.target.value)}
                             className="w-full rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                            disabled={loading.options}
                         >
                             <option value="">Tất cả rạp</option>
-                            {cinemas.map((cinema) => (
+                            {cinemaOptions.map((cinema) => (
                                 <option key={cinema._id} value={cinema._id}>
                                     {cinema.name}
                                 </option>
@@ -412,12 +433,12 @@ const Showtimes: React.FC = () => {
                                 <tr key={showtime._id}>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="text-sm font-medium text-gray-900">
-                                            {getMovieName(showtime.movieId)}
+                                            {showtime.movieId.title}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="text-sm text-gray-900">
-                                            {getCinemaName(showtime.cinemaId)}
+                                            {showtime.cinemaId.name}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">

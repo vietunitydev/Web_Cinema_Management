@@ -2,6 +2,7 @@ const Cinema = require('../models/Cinema');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const APIFeatures = require('../utils/apiFeatures');
+const mongoose = require("mongoose");
 
 /**
  * @desc    Lấy tất cả rạp chiếu phim
@@ -31,6 +32,9 @@ exports.getAllCinemas = catchAsync(async (req, res, next) => {
  * @access  Public
  */
 exports.getCinema = catchAsync(async (req, res, next) => {
+
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) return next();
+
     const cinema = await Cinema.findById(req.params.id);
 
     if (!cinema) {
@@ -261,5 +265,22 @@ exports.getCinemasByCity = catchAsync(async (req, res, next) => {
         data: {
             cinemas
         }
+    });
+});
+
+/**
+ * @desc    Lấy danh sách options rạp cho dropdown
+ * @route   GET /api/cinemas/options
+ * @access  Private (Admin, Manager)
+ */
+exports.getCinemaOptions = catchAsync(async (req, res, next) => {
+    // Chỉ lấy các thông tin cần thiết: id, tên và địa chỉ
+    const cinemaOptions = await Cinema.find({})
+        .select('_id name location.city')
+        .sort({ name: 1 }); // Sắp xếp theo tên để dễ tìm
+
+    res.status(200).json({
+        status: 'success',
+        data: cinemaOptions
     });
 });

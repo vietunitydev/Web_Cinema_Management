@@ -1,6 +1,6 @@
 // src/services/cinemaService.ts
 import api from './api';
-import type { ApiResponse, Cinema, Hall, PaginatedResponse, Showtime } from '../types/models';
+import type { ApiResponse, Cinema, Hall, PaginatedResponse, Showtime, CinemaOption } from '../types/models';
 
 export const cinemaService = {
     getAllCinemas: (page = 1, limit = 10) =>
@@ -12,6 +12,9 @@ export const cinemaService = {
         api.get<ApiResponse<PaginatedResponse<Cinema>>>(`/cinemas/city/${city}`, {
             params: { page, limit }
         }),
+
+    getCinemaOptions: () =>
+        api.get<ApiResponse<CinemaOption[]>>('/cinemas/options'),
 
     getCinemaById: (id: string) =>
         api.get<ApiResponse<Cinema>>(`/cinemas/${id}`),

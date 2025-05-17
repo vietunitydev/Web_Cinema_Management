@@ -4,6 +4,7 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const APIFeatures = require('../utils/apiFeatures');
 const cloudinary = require('../config/cloudinary');
+const mongoose = require("mongoose");
 
 /**
  * @desc    Lấy tất cả phim
@@ -44,6 +45,9 @@ exports.getAllMovies = catchAsync(async (req, res, next) => {
  * @access  Public
  */
 exports.getMovie = catchAsync(async (req, res, next) => {
+
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) return next();
+
     const movie = await Movie.findById(req.params.id).populate('reviews');
 
     if (!movie) {
@@ -293,5 +297,23 @@ exports.getTopRated = catchAsync(async (req, res, next) => {
             limit,
             totalPages
         }
+    });
+});
+
+/**
+ * @desc    Lấy danh sách options phim cho dropdown
+ * @route   GET /api/movies/options
+ * @access  Private (Admin, Manager)
+ */
+exports.getMovieOptions = catchAsync(async (req, res, next) => {
+    console.log("get movie options");
+    // Chỉ lấy các thông tin cần thiết: id và title
+    const movieOptions = await Movie.find({})
+        .select('_id title')
+        .sort({ title: 1 }); // Sắp xếp theo tên để dễ tìm
+
+    res.status(200).json({
+        status: 'success',
+        data: movieOptions
     });
 });

@@ -28,6 +28,9 @@ router.use(authMiddleware.protect);
 // Routes chỉ dành cho Admin và Manager
 router.use(authMiddleware.restrictTo('admin', 'manager'));
 
+router.get('/options', movieController.getMovieOptions);
+
+
 // Quản lý phim
 // router.route('/')
 //     .post(uploadMiddleware.uploadMovieImages,

@@ -19,12 +19,23 @@ exports.getAllShowtimes = catchAsync(async (req, res, next) => {
 
     const showtimes = await features.query;
 
+    const totalCount = await Showtime.countDocuments(features.queryObj);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const totalPages = Math.ceil(totalCount / limit);
+
+    // Trả về kết quả
     res.status(200).json({
         status: 'success',
         data: {
-            data: showtimes
+            data: showtimes,
+            totalCount,
+            page,
+            limit,
+            totalPages
         }
     });
+
 });
 
 /**

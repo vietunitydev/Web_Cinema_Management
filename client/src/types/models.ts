@@ -146,6 +146,16 @@ export interface Promotion {
     status: 'active' | 'upcoming' | 'expired';
 }
 
+export interface MovieOption {
+    _id: string;
+    title: string;
+}
+
+export interface CinemaOption {
+    _id: string;
+    name: string;
+}
+
 // API Response Types
 export interface PaginatedResponse<T> {
     data: T[];
@@ -162,3 +172,4 @@ export interface ApiResponse<T> {
     message?: string;
     error?: string;
 }
+

@@ -1,6 +1,6 @@
 // src/services/movieService.ts
 import api from './api';
-import type { ApiResponse, Movie, PaginatedResponse, Review, Showtime } from '../types/models';
+import type { ApiResponse, Movie, PaginatedResponse, Review, Showtime, MovieOption } from '../types/models';
 
 export interface MovieFilters {
     title?: string;
@@ -29,6 +29,9 @@ export const movieService = {
         api.get<ApiResponse<PaginatedResponse<Movie>>>('/movies/top-rated', {
             params: { page, limit }
         }),
+
+    getMovieOptions: () =>
+        api.get<ApiResponse<MovieOption[]>>('/movies/options'),
 
     searchMovies: (query: string, page = 1, limit = 10) =>
         api.get<ApiResponse<PaginatedResponse<Movie>>>('/movies/search', {
