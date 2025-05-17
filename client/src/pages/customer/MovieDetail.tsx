@@ -42,6 +42,7 @@ const MovieDetail: React.FC = () => {
             // Fetch movie details
             try {
                 const response = await movieService.getMovieById(id);
+                // console.log(response.data);
                 setMovie(response.data ?? null);
                 setLoading((prev) => ({ ...prev, movie: false }));
             } catch {
@@ -50,19 +51,21 @@ const MovieDetail: React.FC = () => {
             }
 
             // Fetch movie reviews
-            try {
-                const response = await movieService.getMovieReviews(id);
-                setReviews(response.data?.data || []);
-                setLoading((prev) => ({ ...prev, reviews: false }));
-            } catch {
-                setError((prev) => ({ ...prev, reviews: 'Không thể tải đánh giá phim' }));
-                setLoading((prev) => ({ ...prev, reviews: false }));
-            }
+            // try {
+            //     const response = await movieService.getMovieReviews(id);
+            //     setReviews(response.data?.data || []);
+            //     setLoading((prev) => ({ ...prev, reviews: false }));
+            // } catch {
+            //     setError((prev) => ({ ...prev, reviews: 'Không thể tải đánh giá phim' }));
+            //     setLoading((prev) => ({ ...prev, reviews: false }));
+            // }
 
             // Fetch upcoming showtimes
             try {
                 const today = new Date().toISOString().split('T')[0];
                 const response = await movieService.getMovieShowtimes(id, today);
+                // console.log(response.data);
+
                 setUpcomingShowtimes(response.data || []);
                 setLoading((prev) => ({ ...prev, showtimes: false }));
             } catch {
