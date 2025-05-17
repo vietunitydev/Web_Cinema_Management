@@ -28,7 +28,6 @@ const Halls: React.FC = () => {
                 const response = await cinemaService.getAllCinemas();
                 const cinemasList = response.data?.data || [];
                 setCinemas(cinemasList);
-                console.log(cinemasList);
 
                 // If cinemas exist, select the first one by default
                 if (cinemasList.length > 0) {
@@ -58,7 +57,6 @@ const Halls: React.FC = () => {
 
             try {
                 const response = await cinemaService.getCinemaHalls(selectedCinema._id);
-                console.log(response);
                 setHalls(response.data || []);
                 setError((prev) => ({ ...prev, halls: null }));
             } catch {
