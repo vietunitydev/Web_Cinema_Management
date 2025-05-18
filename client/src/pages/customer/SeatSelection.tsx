@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { showtimeService } from '../../services/showtimeService';
 import { promotionService } from '../../services/promotionService';
-import type {Cinema, Movie, Showtime} from '../../types/models';
+import type {ShowtimeResponse} from '../../types/models';
 import type { PromotionCheckResult } from '../../services/promotionService';
 import { useAuth } from '../../context/AuthContext';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -11,26 +11,6 @@ import Button from '../../components/common/Button';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { toast } from 'react-toastify';
-
-export interface ShowtimeResponse {
-    _id: string;
-    movieId?: Movie; // Populated reference
-    cinemaId?: Cinema; // Populated reference
-    hallId: string;
-    startTime: string;
-    endTime: string;
-    language: string;
-    subtitles: string[];
-    format: string; // 2D, 3D, IMAX, 4DX
-    price: {
-        regular: number;
-        vip?: number;
-        student?: number;
-    };
-    availableSeats: string[];
-    bookedSeats: string[];
-    status: 'open' | 'canceled' | 'sold_out';
-}
 
 const SeatSelection: React.FC = () => {
     const { id } = useParams<{ id: string }>(); // Showtime ID

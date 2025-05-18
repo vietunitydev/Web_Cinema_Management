@@ -156,6 +156,27 @@ export interface CinemaOption {
     name: string;
 }
 
+export interface ShowtimeResponse {
+    _id: string;
+    movieId?: Movie; // Populated reference
+    cinemaId?: Cinema; // Populated reference
+    hallId: string;
+    startTime: string;
+    endTime: string;
+    language: string;
+    subtitles: string[];
+    format: string; // 2D, 3D, IMAX, 4DX
+    price: {
+        regular: number;
+        vip?: number;
+        student?: number;
+    };
+    availableSeats: string[];
+    bookedSeats: string[];
+    status: 'open' | 'canceled' | 'sold_out';
+}
+
+
 // API Response Types
 export interface PaginatedResponse<T> {
     data: T[];

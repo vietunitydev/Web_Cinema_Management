@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { showtimeService, type ShowtimeFilters } from '../../services/showtimeService';
 import { movieService } from '../../services/movieService';
 import { cinemaService } from '../../services/cinemaService';
-import type { Movie, Cinema, MovieOption, CinemaOption} from '../../types/models';
+import type {Movie, Cinema, MovieOption, CinemaOption, ShowtimeResponse} from '../../types/models';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import Button from '../../components/common/Button';
 import Pagination from '../../components/common/Pagination';
@@ -17,25 +17,6 @@ interface ErrorState {
     movieOptions: string | null;
     cinemaOptions: string | null;
     details: string | null;
-}
-export interface ShowtimeResponse {
-    _id: string;
-    movieId?: Movie; // Populated reference
-    cinemaId?: Cinema; // Populated reference
-    hallId: string;
-    startTime: string;
-    endTime: string;
-    language: string;
-    subtitles: string[];
-    format: string; // 2D, 3D, IMAX, 4DX
-    price: {
-        regular: number;
-        vip?: number;
-        student?: number;
-    };
-    availableSeats: string[];
-    bookedSeats: string[];
-    status: 'open' | 'canceled' | 'sold_out';
 }
 
 const Showtimes: React.FC = () => {

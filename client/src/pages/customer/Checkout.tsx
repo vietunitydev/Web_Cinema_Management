@@ -4,7 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { bookingService, type CreateBookingData } from '../../services/bookingService';
 import { showtimeService } from '../../services/showtimeService';
 import { useAuth } from '../../context/AuthContext';
-import type { Showtime } from '../../types/models';
+import type { ShowtimeResponse} from '../../types/models';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import Button from '../../components/common/Button';
 import { format } from 'date-fns';
@@ -31,7 +31,7 @@ const Checkout: React.FC = () => {
     const { user } = useAuth();
 
     const [bookingData, setBookingData] = useState<BookingData | null>(null);
-    const [showtime, setShowtime] = useState<Showtime | null>(null);
+    const [showtime, setShowtime] = useState<ShowtimeResponse | null>(null);
     const [paymentMethod, setPaymentMethod] = useState<string>('');
     const [acceptTerms, setAcceptTerms] = useState<boolean>(false);
     const [loading, setLoading] = useState({
@@ -52,12 +52,14 @@ const Checkout: React.FC = () => {
         }
 
         const parsedData = JSON.parse(storedData);
+        // console.log(parsedData);
         setBookingData(parsedData);
 
         // Fetch showtime details
         const fetchShowtime = async () => {
             try {
                 const response = await showtimeService.getShowtimeById(parsedData.showtimeId);
+                console.log(response);
                 setShowtime(response.data ?? null);
                 setLoading((prev) => ({ ...prev, showtime: false }));
             } catch {
@@ -170,15 +172,15 @@ const Checkout: React.FC = () => {
                                 <div className="flex items-start">
                                     <div className="w-16 h-24 flex-shrink-0 rounded overflow-hidden mr-4">
                                         <img
-                                            src={showtime.movie?.posterUrl}
-                                            alt={showtime.movie?.title}
+                                            src={showtime.movieId?.posterUrl}
+                                            alt={showtime.movieId?.title}
                                             className="w-full h-full object-cover"
                                         />
                                     </div>
                                     <div>
-                                        <h3 className="font-semibold">{showtime.movie?.title}</h3>
+                                        <h3 className="font-semibold">{showtime.movieId?.title}</h3>
                                         <p className="text-gray-600 text-sm">
-                                            {showtime.cinema?.name} • {showtime.format}
+                                            {showtime.cinemaId?.name} • {showtime.format}
                                         </p>
                                         <p className="text-gray-600 text-sm">
                                             {formatDateTime(showtime.startTime)}

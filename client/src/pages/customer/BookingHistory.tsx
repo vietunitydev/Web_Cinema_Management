@@ -35,6 +35,7 @@ const BookingHistory: React.FC = () => {
             setLoading(true);
             try {
                 const response = await bookingService.getUserBookings(currentPage, itemsPerPage);
+                console.log(response);
                 setBookings(response.data?.data || []);
                 setTotalItems(response.data?.totalCount || 0);
                 setTotalPages(response.data?.totalPages || 1);
@@ -222,12 +223,12 @@ const BookingHistory: React.FC = () => {
                                             {/* Booking Details */}
                                             <div className="md:ml-6 flex-grow">
                                                 <h3 className="text-xl font-bold mb-2">
-                                                    {booking.movie ? (
+                                                    {booking.movieId ? (
                                                         <Link
-                                                            to={`/movies/${booking.movie._id}`}
+                                                            to={`/movies/${booking.movieId._id}`}
                                                             className="hover:text-primary transition-colors"
                                                         >
-                                                            {booking.movie.title}
+                                                            {booking.movieId.title}
                                                         </Link>
                                                     ) : (
                                                         'Phim không xác định'
@@ -237,12 +238,12 @@ const BookingHistory: React.FC = () => {
                                                 <div className="space-y-2 mb-4">
                                                     <p className="text-gray-600">
                                                         <span className="font-medium">Rạp:</span>{' '}
-                                                        {booking.cinema?.name || 'Không xác định'}
+                                                        {booking.cinemaId?.name || 'Không xác định'}
                                                     </p>
                                                     <p className="text-gray-600">
                                                         <span className="font-medium">Suất chiếu:</span>{' '}
-                                                        {booking.showtime
-                                                            ? formatDateTime(booking.showtime.startTime)
+                                                        {booking.showtimeId
+                                                            ? formatDateTime(booking.showtimeId.startTime)
                                                             : 'Không xác định'}
                                                     </p>
                                                     <p className="text-gray-600">

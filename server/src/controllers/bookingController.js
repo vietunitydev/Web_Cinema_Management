@@ -236,13 +236,23 @@ exports.getMyBookings = catchAsync(async (req, res, next) => {
         .limitFields()
         .paginate();
 
-    const bookings = await features.query;
+    const data = await features.query;
 
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const totalCount = await Booking.countDocuments(features.queryObj);
+    const totalPages = Math.ceil(totalCount / limit);
+
+    // Trả về kết quả
     res.status(200).json({
         status: 'success',
-        results: bookings.length,
         data: {
-            bookings
+            data,
+            totalCount,
+            page,
+            limit,
+            totalPages
         }
     });
 });
