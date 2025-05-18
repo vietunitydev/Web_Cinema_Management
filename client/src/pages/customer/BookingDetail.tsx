@@ -46,19 +46,20 @@ const BookingDetail: React.FC = () => {
             setLoading(true);
             try {
                 const response = await bookingService.getBookingById(id);
+                console.log(response);
                 setBooking(response.data ?? null);
 
                 // Check if user has already reviewed this movie with this booking
-                try {
-                    const reviewsResponse = await reviewService.getUserReviews();
-                    const reviews = reviewsResponse.data?.data || [];
-                    const hasUserReviewed = reviews.some(
-                        (review) => review.movieId === response.data.movieId && review.bookingId === response.data._id
-                    );
-                    setHasReviewed(hasUserReviewed);
-                } catch (err) {
-                    console.error('Error checking reviews:', err);
-                }
+                // try {
+                //     const reviewsResponse = await reviewService.getUserReviews();
+                //     const reviews = reviewsResponse.data?.data || [];
+                //     const hasUserReviewed = reviews.some(
+                //         (review) => review.movieId === response.data.movieId && review.bookingId === response.data._id
+                //     );
+                //     setHasReviewed(hasUserReviewed);
+                // } catch (err) {
+                //     console.error('Error checking reviews:', err);
+                // }
 
                 setError(null);
             } catch {
@@ -230,8 +231,8 @@ const BookingDetail: React.FC = () => {
                                     <div className="w-full md:w-1/3 mb-4 md:mb-0">
                                         <div className="w-full h-auto aspect-[2/3] rounded-lg overflow-hidden">
                                             <img
-                                                src={booking.movie.posterUrl}
-                                                alt={booking.movie.title}
+                                                src={booking.movieId.posterUrl}
+                                                alt={booking.movieId.title}
                                                 className="w-full h-full object-cover"
                                             />
                                         </div>
@@ -240,9 +241,9 @@ const BookingDetail: React.FC = () => {
 
                                 <div className="md:ml-6 flex-grow">
                                     <h2 className="text-2xl font-bold mb-4">
-                                        {booking.movie ? (
-                                            <Link to={`/movies/${booking.movie._id}`} className="hover:text-primary transition-colors">
-                                                {booking.movie.title}
+                                        {booking.movieId ? (
+                                            <Link to={`/movies/${booking.movieId._id}`} className="hover:text-primary transition-colors">
+                                                {booking.movieId.title}
                                             </Link>
                                         ) : (
                                             'Phim không xác định'
@@ -253,23 +254,23 @@ const BookingDetail: React.FC = () => {
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3">
                                             <div>
                                                 <span className="font-medium text-gray-700">Rạp:</span>
-                                                <p>{booking.cinema?.name || 'Không xác định'}</p>
+                                                <p>{booking.cinemaId?.name || 'Không xác định'}</p>
                                             </div>
                                             <div>
                                                 <span className="font-medium text-gray-700">Phòng chiếu:</span>
-                                                <p>{booking.cinema?.halls.find(h => h.hallId === booking.hallId)?.name || booking.hallId}</p>
+                                                <p>{booking.hallId}</p>
                                             </div>
                                             <div>
                                                 <span className="font-medium text-gray-700">Suất chiếu:</span>
                                                 <p>
-                                                    {booking.showtime
-                                                        ? formatDateTime(booking.showtime.startTime)
+                                                    {booking.showtimeId
+                                                        ? formatDateTime(booking.showtimeId.startTime)
                                                         : 'Không xác định'}
                                                 </p>
                                             </div>
                                             <div>
                                                 <span className="font-medium text-gray-700">Định dạng:</span>
-                                                <p>{booking.showtime?.format || 'Không xác định'}</p>
+                                                <p>{booking.showtimeId?.format || 'Không xác định'}</p>
                                             </div>
                                         </div>
 
@@ -375,7 +376,7 @@ const BookingDetail: React.FC = () => {
                                     In vé
                                 </Button>
 
-                                {isPastBooking && booking.movie && booking.status === 'confirmed' && !hasReviewed && (
+                                {isPastBooking && booking.movieId && booking.status === 'confirmed' && !hasReviewed && (
                                     <Button
                                         variant={showReviewForm ? "outline" : "primary"}
                                         onClick={() => setShowReviewForm(!showReviewForm)}
@@ -409,10 +410,10 @@ const BookingDetail: React.FC = () => {
                     </div>
 
                     {/* Review Form */}
-                    {showReviewForm && booking.movie && (
+                    {showReviewForm && booking.movieId && (
                         <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
                             <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                                <h3 className="text-lg font-semibold">Đánh giá phim {booking.movie.title}</h3>
+                                <h3 className="text-lg font-semibold">Đánh giá phim {booking.movieId.title}</h3>
                             </div>
 
                             <div className="p-6">

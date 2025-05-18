@@ -14,6 +14,9 @@ router.post('/', bookingValidation, validate, bookingController.createBooking);
 // Lấy đơn đặt vé của bản thân (route này được dùng tại userRoutes)
 // router.get('/mybookings', bookingController.getMyBookings);
 
+router.route('/:id')
+    .get(bookingController.getBooking);
+
 // Routes cho Admin và Manager
 router.use(authMiddleware.restrictTo('admin', 'manager'));
 
@@ -28,9 +31,9 @@ router.get('/stats/cinemas', bookingController.getCinemaBookingStats);
 // Quản lý đơn đặt vé
 router.route('/')
     .get(bookingController.getAllBookings);
-
-router.route('/:id')
-    .get(bookingController.getBooking);
+//
+// router.route('/:id')
+//     .get(bookingController.getBooking);
 
 // Cập nhật trạng thái đơn đặt vé
 router.patch('/:id/status', bookingController.updateBookingStatus);

@@ -24,9 +24,8 @@ exports.getAllBookings = catchAsync(async (req, res, next) => {
 
     res.status(200).json({
         status: 'success',
-        results: bookings.length,
         data: {
-            bookings
+            data: bookings
         }
     });
 });
@@ -46,16 +45,14 @@ exports.getBooking = catchAsync(async (req, res, next) => {
     // Kiểm tra quyền truy cập
     if (
         req.user.role === 'customer' &&
-        booking.userId.toString() !== req.user.id.toString()
+        booking.userId._id.toString() !== req.user.id.toString()
     ) {
         return next(new AppError('Bạn không có quyền truy cập đơn đặt vé này', 403));
     }
 
     res.status(200).json({
         status: 'success',
-        data: {
-            booking
-        }
+        data: booking
     });
 });
 
@@ -147,9 +144,7 @@ exports.createBooking = catchAsync(async (req, res, next) => {
 
     res.status(201).json({
         status: 'success',
-        data: {
-            booking
-        }
+        data: booking
     });
 });
 
@@ -195,9 +190,7 @@ exports.updateBookingStatus = catchAsync(async (req, res, next) => {
 
     res.status(200).json({
         status: 'success',
-        data: {
-            booking
-        }
+        data: booking
     });
 });
 
@@ -215,9 +208,7 @@ exports.verifyBookingCode = catchAsync(async (req, res, next) => {
 
     res.status(200).json({
         status: 'success',
-        data: {
-            booking
-        }
+        data: booking
     });
 });
 
