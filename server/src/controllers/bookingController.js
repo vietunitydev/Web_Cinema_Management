@@ -263,7 +263,10 @@ exports.getDailyBookingStats = catchAsync(async (req, res, next) => {
 
     // Chuyển đổi chuỗi ngày thành đối tượng Date
     const start = new Date(startDate);
+    start.setHours(0, 0, 0, 0); // Đặt thời gian về 00:00:00.000
+
     const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999); // Đặt thời gian về 23:59:59.999
 
     if (isNaN(start.getTime()) || isNaN(end.getTime())) {
         return next(new AppError('Ngày không hợp lệ, vui lòng sử dụng định dạng YYYY-MM-DD', 400));
@@ -274,7 +277,7 @@ exports.getDailyBookingStats = catchAsync(async (req, res, next) => {
         {
             $match: {
                 bookingTime: { $gte: start, $lte: end },
-                status: { $in: ['confirmed', 'completed'] }
+                status: { $in: ['confirmed', 'completed', 'pending'] }
             }
         },
         {
@@ -285,7 +288,8 @@ exports.getDailyBookingStats = catchAsync(async (req, res, next) => {
                     day: { $dayOfMonth: '$bookingTime' }
                 },
                 count: { $sum: 1 },
-                totalRevenue: { $sum: '$finalAmount' }
+                totalRevenue: { $sum: '$finalAmount' },
+                ticketCount: { $sum: { $size: '$seats' } }
             }
         },
         {
@@ -297,18 +301,36 @@ exports.getDailyBookingStats = catchAsync(async (req, res, next) => {
         }
     ]);
 
-    // Chuyển đổi kết quả thành định dạng dễ đọc hơn
-    const formattedStats = stats.map(stat => ({
-        date: `${stat._id.year}-${stat._id.month}-${stat._id.day}`,
-        bookings: stat.count,
+    // Format lại kết quả theo interface BookingStats
+    const formattedData = stats.map(stat => ({
+        date: `${stat._id.year}-${stat._id.month.toString().padStart(2, '0')}-${stat._id.day.toString().padStart(2, '0')}`,
+        count: stat.count,
         revenue: stat.totalRevenue
     }));
 
+    // Tính tổng doanh thu và số vé bán được
+    let totalRevenue = 0;
+    let ticketsSold = 0;
+
+    stats.forEach(stat => {
+        totalRevenue += stat.totalRevenue;
+        ticketsSold += stat.ticketCount;
+    });
+
+    // Tính giá vé trung bình (nếu có vé bán ra)
+    const averageTicketPrice = ticketsSold > 0 ? Math.round(totalRevenue / ticketsSold) : 0;
+
+    // Tạo đối tượng kết quả theo interface
+    const result = {
+        totalRevenue,
+        ticketsSold,
+        averageTicketPrice,
+        data: formattedData
+    };
+
     res.status(200).json({
         status: 'success',
-        data: {
-            stats: formattedStats
-        }
+        data: result
     });
 });
 
@@ -320,16 +342,19 @@ exports.getDailyBookingStats = catchAsync(async (req, res, next) => {
 exports.getMovieBookingStats = catchAsync(async (req, res, next) => {
     const { startDate, endDate } = req.query;
 
-    // Xử lý ngày bắt đầu và kết thúc tương tự như trên
+    // Xử lý ngày bắt đầu và kết thúc
     const start = startDate ? new Date(startDate) : new Date(0);
+    start.setHours(0, 0, 0, 0);
+
     const end = endDate ? new Date(endDate) : new Date();
+    end.setHours(23, 59, 59, 999);
 
     // Thống kê doanh thu theo phim
     const stats = await Booking.aggregate([
         {
             $match: {
                 bookingTime: { $gte: start, $lte: end },
-                status: { $in: ['confirmed', 'completed'] }
+                status: { $in: ['confirmed', 'completed', 'pending'] }
             }
         },
         {
@@ -337,7 +362,7 @@ exports.getMovieBookingStats = catchAsync(async (req, res, next) => {
                 _id: '$movieId',
                 count: { $sum: 1 },
                 totalRevenue: { $sum: '$finalAmount' },
-                seats: { $sum: { $size: '$seats' } }
+                ticketCount: { $sum: { $size: '$seats' } }
             }
         },
         {
@@ -355,19 +380,37 @@ exports.getMovieBookingStats = catchAsync(async (req, res, next) => {
         movieMap[movie._id] = movie.title;
     });
 
-    const formattedStats = stats.map(stat => ({
-        movieId: stat._id,
+    // Format lại kết quả theo interface BookingStats
+    const formattedData = stats.map(stat => ({
+        movieId: stat._id.toString(),
         movieTitle: movieMap[stat._id] || 'Unknown',
-        bookings: stat.count,
-        tickets: stat.seats,
+        count: stat.count,
         revenue: stat.totalRevenue
     }));
 
+    // Tính tổng doanh thu và số vé bán được
+    let totalRevenue = 0;
+    let ticketsSold = 0;
+
+    stats.forEach(stat => {
+        totalRevenue += stat.totalRevenue;
+        ticketsSold += stat.ticketCount;
+    });
+
+    // Tính giá vé trung bình
+    const averageTicketPrice = ticketsSold > 0 ? Math.round(totalRevenue / ticketsSold) : 0;
+
+    // Tạo đối tượng kết quả theo interface
+    const result = {
+        totalRevenue,
+        ticketsSold,
+        averageTicketPrice,
+        data: formattedData
+    };
+
     res.status(200).json({
         status: 'success',
-        data: {
-            stats: formattedStats
-        }
+        data: result
     });
 });
 
@@ -379,16 +422,19 @@ exports.getMovieBookingStats = catchAsync(async (req, res, next) => {
 exports.getCinemaBookingStats = catchAsync(async (req, res, next) => {
     const { startDate, endDate } = req.query;
 
-    // Xử lý ngày bắt đầu và kết thúc tương tự như trên
+    // Xử lý ngày bắt đầu và kết thúc
     const start = startDate ? new Date(startDate) : new Date(0);
+    start.setHours(0, 0, 0, 0);
+
     const end = endDate ? new Date(endDate) : new Date();
+    end.setHours(23, 59, 59, 999);
 
     // Thống kê doanh thu theo rạp
     const stats = await Booking.aggregate([
         {
             $match: {
                 bookingTime: { $gte: start, $lte: end },
-                status: { $in: ['confirmed', 'completed'] }
+                status: { $in: ['confirmed', 'completed', 'pending'] }
             }
         },
         {
@@ -396,7 +442,7 @@ exports.getCinemaBookingStats = catchAsync(async (req, res, next) => {
                 _id: '$cinemaId',
                 count: { $sum: 1 },
                 totalRevenue: { $sum: '$finalAmount' },
-                seats: { $sum: { $size: '$seats' } }
+                ticketCount: { $sum: { $size: '$seats' } }
             }
         },
         {
@@ -414,18 +460,36 @@ exports.getCinemaBookingStats = catchAsync(async (req, res, next) => {
         cinemaMap[cinema._id] = cinema.name;
     });
 
-    const formattedStats = stats.map(stat => ({
-        cinemaId: stat._id,
+    // Format lại kết quả theo interface BookingStats
+    const formattedData = stats.map(stat => ({
+        cinemaId: stat._id.toString(),
         cinemaName: cinemaMap[stat._id] || 'Unknown',
-        bookings: stat.count,
-        tickets: stat.seats,
+        count: stat.count,
         revenue: stat.totalRevenue
     }));
 
+    // Tính tổng doanh thu và số vé bán được
+    let totalRevenue = 0;
+    let ticketsSold = 0;
+
+    stats.forEach(stat => {
+        totalRevenue += stat.totalRevenue;
+        ticketsSold += stat.ticketCount;
+    });
+
+    // Tính giá vé trung bình
+    const averageTicketPrice = ticketsSold > 0 ? Math.round(totalRevenue / ticketsSold) : 0;
+
+    // Tạo đối tượng kết quả theo interface
+    const result = {
+        totalRevenue,
+        ticketsSold,
+        averageTicketPrice,
+        data: formattedData
+    };
+
     res.status(200).json({
         status: 'success',
-        data: {
-            stats: formattedStats
-        }
+        data: result
     });
 });
