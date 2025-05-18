@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { showtimeService } from '../../services/showtimeService';
 import { promotionService } from '../../services/promotionService';
-import type { Showtime } from '../../types/models';
+import type {Cinema, Movie, Showtime} from '../../types/models';
 import type { PromotionCheckResult } from '../../services/promotionService';
 import { useAuth } from '../../context/AuthContext';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -12,12 +12,32 @@ import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { toast } from 'react-toastify';
 
+export interface ShowtimeResponse {
+    _id: string;
+    movieId?: Movie; // Populated reference
+    cinemaId?: Cinema; // Populated reference
+    hallId: string;
+    startTime: string;
+    endTime: string;
+    language: string;
+    subtitles: string[];
+    format: string; // 2D, 3D, IMAX, 4DX
+    price: {
+        regular: number;
+        vip?: number;
+        student?: number;
+    };
+    availableSeats: string[];
+    bookedSeats: string[];
+    status: 'open' | 'canceled' | 'sold_out';
+}
+
 const SeatSelection: React.FC = () => {
     const { id } = useParams<{ id: string }>(); // Showtime ID
     const { user } = useAuth();
     const navigate = useNavigate();
 
-    const [showtime, setShowtime] = useState<Showtime | null>(null);
+    const [showtime, setShowtime] = useState<ShowtimeResponse | null>(null);
     const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
     const [promoCode, setPromoCode] = useState('');
     const [promoDiscount, setPromoDiscount] = useState<number>(0);
@@ -39,7 +59,8 @@ const SeatSelection: React.FC = () => {
 
             try {
                 const response = await showtimeService.getShowtimeById(id);
-                setShowtime(response.data);
+                console.log(response.data);
+                setShowtime(response.data ?? null);
                 setLoading((prev) => ({ ...prev, showtime: false }));
             } catch (err) {
                 setError((prev) => ({ ...prev, showtime: 'Không thể tải thông tin suất chiếu' }));
@@ -49,6 +70,13 @@ const SeatSelection: React.FC = () => {
 
         fetchShowtime();
     }, [id]);
+
+    useEffect(() => {
+        console.log('Showtime đã được cập nhật:', showtime);
+
+        if (showtime) {
+        }
+    }, [showtime]);
 
     // Seat selection handler
     const handleSeatClick = (seatId: string) => {
@@ -155,9 +183,9 @@ const SeatSelection: React.FC = () => {
 
     // Prepare the seating chart
     const renderSeatingChart = () => {
-        if (!showtime || !showtime.cinema || !showtime.movie) return null;
+        if (!showtime || !showtime.cinemaId || !showtime.movieId) return null;
 
-        const hall = showtime.cinema.halls.find(h => h.hallId === showtime.hallId);
+        const hall = showtime.cinemaId.halls.find(h => h.hallId === showtime.hallId);
 
         if (!hall) return <div className="text-center py-4">Không có thông tin về phòng chiếu</div>;
 
@@ -248,7 +276,7 @@ const SeatSelection: React.FC = () => {
     }
 
     // Extra safety check for movie and cinema data
-    if (!showtime.movie || !showtime.cinema) {
+    if (!showtime.movieId || !showtime.cinemaId) {
         return (
             <div className="container mx-auto px-4 py-16 text-center">
                 <h2 className="text-2xl font-bold text-red-600 mb-4">
@@ -271,24 +299,24 @@ const SeatSelection: React.FC = () => {
                         <div className="flex items-center mb-2 md:mb-0">
                             <div className="w-12 h-16 flex-shrink-0 rounded overflow-hidden mr-4">
                                 <img
-                                    src={showtime.movie.posterUrl}
-                                    alt={showtime.movie.title}
+                                    src={showtime.movieId.posterUrl}
+                                    alt={showtime.movieId.title}
                                     className="w-full h-full object-cover"
                                 />
                             </div>
                             <div>
-                                <h1 className="text-lg font-bold">{showtime.movie.title}</h1>
+                                <h1 className="text-lg font-bold">{showtime.movieId.title}</h1>
                                 <div className="text-sm text-gray-300">
                                     <span>{formatDateTime(showtime.startTime)}</span>
                                     <span className="mx-2">•</span>
                                     <span>{showtime.format}</span>
                                     <span className="mx-2">•</span>
-                                    <span>{showtime.cinema.name}</span>
+                                    <span>{showtime.movieId.title}</span>
                                 </div>
                             </div>
                         </div>
                         <div className="md:ml-auto mt-2 md:mt-0">
-                            <Link to={`/movies/${showtime.movie._id}/showtimes`}>
+                            <Link to={`/movies/${showtime.movieId._id}/showtimes`}>
                                 <Button variant="outline" size="sm">
                                     Chọn suất khác
                                 </Button>
@@ -334,9 +362,9 @@ const SeatSelection: React.FC = () => {
 
                             {/* Movie Information */}
                             <div className="mb-4 pb-4 border-b border-gray-200">
-                                <h3 className="font-semibold">{showtime.movie.title}</h3>
+                                <h3 className="font-semibold">{showtime.cinemaId.name}</h3>
                                 <p className="text-gray-600 text-sm">
-                                    {showtime.cinema.name} • {showtime.format}
+                                    {showtime.cinemaId.name} • {showtime.format}
                                 </p>
                                 <p className="text-gray-600 text-sm">
                                     {formatDateTime(showtime.startTime)}
