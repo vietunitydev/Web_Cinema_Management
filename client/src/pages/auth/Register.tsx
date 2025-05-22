@@ -17,7 +17,7 @@ const Register: React.FC = () => {
             username: '',
             email: '',
             phone: '',
-            password: '',
+            passwordHash: '',
             confirmPassword: '',
         },
         validationSchema: Yup.object({
@@ -33,20 +33,17 @@ const Register: React.FC = () => {
             phone: Yup.string()
                 .matches(/^[0-9]{10}$/, 'Số điện thoại phải có 10 chữ số')
                 .notRequired(),
-            password: Yup.string()
+            passwordHash: Yup.string()
                 .min(6, 'Mật khẩu phải có ít nhất 6 ký tự')
                 .required('Mật khẩu là bắt buộc'),
             confirmPassword: Yup.string()
-                .oneOf([Yup.ref('password')], 'Mật khẩu xác nhận không khớp')
+                .oneOf([Yup.ref('passwordHash')], 'Mật khẩu xác nhận không khớp')
                 .required('Xác nhận mật khẩu là bắt buộc'),
         }),
         onSubmit: async (values) => {
             setIsLoading(true);
             try {
-                // Remove confirmPassword before sending to API
-                const { confirmPassword, ...registerData } = values;
-
-                await register(registerData);
+                await register(values);
                 toast.success('Đăng ký thành công!');
                 navigate('/');
             } catch (error: any) {
@@ -168,26 +165,26 @@ const Register: React.FC = () => {
                             )}
                         </div>
                         <div>
-                            <label htmlFor="password" className="sr-only">
+                            <label htmlFor="passwordHash" className="sr-only">
                                 Mật khẩu
                             </label>
                             <input
-                                id="password"
-                                name="password"
+                                id="passwordHash"
+                                name="passwordHash"
                                 type="password"
                                 autoComplete="new-password"
                                 className={`appearance-none rounded-none relative block w-full px-3 py-2 border ${
-                                    formik.touched.password && formik.errors.password
+                                    formik.touched.passwordHash && formik.errors.passwordHash
                                         ? 'border-red-300 placeholder-red-300 focus:ring-red-500 focus:border-red-500'
                                         : 'border-gray-300 placeholder-gray-500 focus:ring-primary focus:border-primary'
                                 } text-gray-900 focus:outline-none focus:z-10 sm:text-sm`}
                                 placeholder="Mật khẩu"
-                                value={formik.values.password}
+                                value={formik.values.passwordHash}
                                 onChange={formik.handleChange}
                                 onBlur={formik.handleBlur}
                             />
-                            {formik.touched.password && formik.errors.password && (
-                                <p className="mt-1 text-sm text-red-600">{formik.errors.password}</p>
+                            {formik.touched.passwordHash && formik.errors.passwordHash && (
+                                <p className="mt-1 text-sm text-red-600">{formik.errors.passwordHash}</p>
                             )}
                         </div>
                         <div>

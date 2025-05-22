@@ -61,10 +61,14 @@ const userSchema = new mongoose.Schema(
 
 // Phương thức hash mật khẩu trước khi lưu
 userSchema.pre('save', async function (next) {
+    console.log("register - hash before saving");
     if (!this.isModified('passwordHash')) {
         return next();
     }
+    console.log("register - hash");
     this.passwordHash = await bcrypt.hash(this.passwordHash, 10);
+    console.log("register - after hash");
+
     next();
 });
 

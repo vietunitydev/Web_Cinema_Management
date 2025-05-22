@@ -79,7 +79,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         try {
             await authService.register(userData);
             // Auto login after registration
-            await login(userData.email, userData.password);
+            await login(userData.email, userData.passwordHash);
         } catch (err: any) {
             setError(err.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại.');
             throw err;

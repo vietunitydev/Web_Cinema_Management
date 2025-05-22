@@ -11,6 +11,9 @@ const { sendToken } = require('../utils/generateToken');
 exports.register = catchAsync(async (req, res, next) => {
     const { username, email, passwordHash, confirmPassword, fullName, phone, dateOfBirth, address } = req.body;
 
+    console.log("register");
+    console.log(req.body);
+
     // Kiểm tra người dùng đã tồn tại chưa
     const userExists = await User.findOne({ $or: [{ email }, { username }] });
     if (userExists) {
