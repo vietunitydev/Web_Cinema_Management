@@ -76,18 +76,27 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, showStatus = false }) => {
         ended: 'Đã kết thúc',
     };
 
+    // Truncate genres if too long
+    const displayGenres = () => {
+        const genreString = movie.genre.join(', ');
+        if (genreString.length > 25) {
+            return genreString.substring(0, 25) + '...';
+        }
+        return genreString;
+    };
+
     return (
-        <div className="card overflow-hidden transition-all duration-300 hover:shadow-xl">
-            <Link to={`/movies/${movie._id}`} className="block relative group">
+        <div className="card overflow-hidden transition-all duration-300 hover:shadow-xl h-full flex flex-col">
+            <Link to={`/movies/${movie._id}`} className="block relative group flex-1 flex flex-col">
                 {/* Status badge */}
                 {showStatus && (
                     <span
-                        className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-medium ${
+                        className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-medium z-10 ${
                             statusColors[movie.status]
                         }`}
                     >
-            {statusText[movie.status]}
-          </span>
+                        {statusText[movie.status]}
+                    </span>
                 )}
 
                 {/* Poster */}
@@ -109,19 +118,24 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, showStatus = false }) => {
                 </div>
 
                 {/* Movie info */}
-                <div className="p-4">
-                    <h3 className="font-bold text-lg mb-1 line-clamp-1" title={movie.title}>
+                <div className="p-4 flex-1 flex flex-col">
+                    {/* Title - fixed height */}
+                    <h3 className="font-bold text-lg mb-2 line-clamp-1 h-7" title={movie.title}>
                         {movie.title}
                     </h3>
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center">
+
+                    {/* Rating and genre - fixed height */}
+                    <div className="flex-1 min-h-12">
+                        <div className="flex items-center mb-2">
                             {renderStars(movie.rating)}
                             <span className="ml-1 text-sm text-gray-600">{movie.rating.toFixed(1)}</span>
                         </div>
-                        <div className="text-sm text-gray-600">{movie.genre.join(', ')}</div>
+                        <div className="text-xs text-gray-600 line-clamp-2" title={movie.genre.join(', ')}>
+                            {displayGenres()}
+                        </div>
                     </div>
 
-                    {/* Call to action button */}
+                    {/* Call to action button - always at bottom */}
                     <div className="mt-4">
                         {movie.status === 'active' ? (
                             <div className="bg-primary hover:bg-primary-dark text-white text-center py-2 rounded-md transition-colors">
