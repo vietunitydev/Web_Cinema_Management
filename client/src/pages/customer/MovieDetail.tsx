@@ -44,27 +44,20 @@ const MovieDetail: React.FC = () => {
                 const response = await movieService.getMovieById(id);
                 // console.log(response.data);
                 setMovie(response.data ?? null);
+                setReviews(response.data.reviews || []);
                 setLoading((prev) => ({ ...prev, movie: false }));
+                setLoading((prev) => ({ ...prev, reviews: false }));
             } catch {
                 setError((prev) => ({ ...prev, movie: 'Không thể tải thông tin phim' }));
                 setLoading((prev) => ({ ...prev, movie: false }));
             }
 
-            // Fetch movie reviews
-            // try {
-            //     const response = await movieService.getMovieReviews(id);
-            //     setReviews(response.data?.data || []);
-            //     setLoading((prev) => ({ ...prev, reviews: false }));
-            // } catch {
-            //     setError((prev) => ({ ...prev, reviews: 'Không thể tải đánh giá phim' }));
-            //     setLoading((prev) => ({ ...prev, reviews: false }));
-            // }
-
             // Fetch upcoming showtimes
             try {
                 const today = new Date().toISOString().split('T')[0];
+                console.log(today);
                 const response = await movieService.getMovieShowtimes(id, today);
-                // console.log(response.data);
+                console.log(response.data);
 
                 setUpcomingShowtimes(response.data || []);
                 setLoading((prev) => ({ ...prev, showtimes: false }));
@@ -133,8 +126,8 @@ const MovieDetail: React.FC = () => {
     }>((acc, showtime) => {
         // Format date as key (e.g., "2023-05-14")
         const date = showtime.startTime.split('T')[0];
-        const cinemaId = showtime.cinemaId;
-        const cinemaName = showtime.cinema?.name || 'Rạp không xác định';
+        const cinemaId = showtime.cinemaId.id;
+        const cinemaName = showtime.cinemaId?.name || 'Rạp không xác định';
 
         // Initialize date group if it doesn't exist
         if (!acc[date]) {

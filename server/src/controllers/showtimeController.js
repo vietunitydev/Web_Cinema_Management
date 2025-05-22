@@ -237,8 +237,37 @@ exports.getShowtimesByMovie = catchAsync(async (req, res, next) => {
         return next(new AppError('Không tìm thấy phim với ID này', 404));
     }
 
+    // Build base query
+    let baseQuery = {
+        movieId: req.params.movieId,
+        status: 'open'
+    };
+
+    // Date filtering logic
+    const { date } = req.query;
+
+    if (date) {
+        // Filter by specific date (format: YYYY-MM-DD)
+        const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+        if (!dateRegex.test(date)) {
+            return next(new AppError('Định dạng ngày không hợp lệ. Sử dụng format YYYY-MM-DD', 400));
+        }
+
+        // Parse date parts to avoid timezone issues
+        const [year, month, day] = date.split('-').map(Number);
+
+        // Create dates in local timezone
+        const startOfDay = new Date(year, month - 1, day, 0, 0, 0, 0);
+        const endOfDay = new Date(year, month - 1, day, 23, 59, 59, 999);
+
+        baseQuery.startTime = {
+            $gte: startOfDay,
+            $lte: endOfDay
+        };
+    }
+
     const features = new APIFeatures(
-        Showtime.find({ movieId: req.params.movieId, status: 'open' }),
+        Showtime.find(baseQuery),
         req.query
     )
         .filter()
