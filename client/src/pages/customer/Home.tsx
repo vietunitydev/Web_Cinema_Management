@@ -289,28 +289,28 @@ const Home: React.FC = () => {
             </section>
 
             {/* Promotion Banner */}
-            <section className="py-16 bg-secondary text-white">
-                <div className="container mx-auto px-4">
-                    <div className="max-w-4xl mx-auto text-center">
-                        <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                            Đăng ký nhận ưu đãi đặc biệt
-                        </h2>
-                        <p className="text-xl md:text-2xl mb-8">
-                            Nhận ngay ưu đãi giảm giá 10% cho lần đặt vé đầu tiên
-                        </p>
-                        <div className="flex flex-col md:flex-row max-w-lg mx-auto gap-4">
-                            <input
-                                type="email"
-                                placeholder="Nhập email của bạn"
-                                className="flex-1 px-4 py-3 rounded-md focus:outline-none text-gray-900"
-                            />
-                            <Button variant="primary" size="lg">
-                                Đăng ký ngay
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            {/*<section className="py-16 bg-secondary text-white">*/}
+            {/*    <div className="container mx-auto px-4">*/}
+            {/*        <div className="max-w-4xl mx-auto text-center">*/}
+            {/*            <h2 className="text-3xl md:text-4xl font-bold mb-4">*/}
+            {/*                Đăng ký nhận ưu đãi đặc biệt*/}
+            {/*            </h2>*/}
+            {/*            <p className="text-xl md:text-2xl mb-8">*/}
+            {/*                Nhận ngay ưu đãi giảm giá 10% cho lần đặt vé đầu tiên*/}
+            {/*            </p>*/}
+            {/*            <div className="flex flex-col md:flex-row max-w-lg mx-auto gap-4">*/}
+            {/*                <input*/}
+            {/*                    type="email"*/}
+            {/*                    placeholder="Nhập email của bạn"*/}
+            {/*                    className="flex-1 px-4 py-3 rounded-md focus:outline-none text-gray-900"*/}
+            {/*                />*/}
+            {/*                <Button variant="primary" size="lg">*/}
+            {/*                    Đăng ký ngay*/}
+            {/*                </Button>*/}
+            {/*            </div>*/}
+            {/*        </div>*/}
+            {/*    </div>*/}
+            {/*</section>*/}
         </div>
     );
 };

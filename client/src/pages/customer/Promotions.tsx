@@ -81,17 +81,17 @@ const Promotions: React.FC = () => {
     };
 
     // Filter promotions based on status
-    const filteredPromotions = promotions.filter(promotion => {
-        const today = new Date();
-        const startDate = new Date(promotion.startDate);
-        const endDate = new Date(promotion.endDate);
-
-        if (filterStatus === 'all') return true;
-        if (filterStatus === 'active') return today >= startDate && today <= endDate;
-        if (filterStatus === 'upcoming') return today < startDate;
-
-        return true;
-    });
+    // const filteredPromotions = promotions.filter(promotion => {
+    //     const today = new Date();
+    //     const startDate = new Date(promotion.startDate);
+    //     const endDate = new Date(promotion.endDate);
+    //
+    //     if (filterStatus === 'all') return true;
+    //     if (filterStatus === 'active') return today >= startDate && today <= endDate;
+    //     if (filterStatus === 'upcoming') return today < startDate;
+    //
+    //     return true;
+    // });
 
     return (
         <div className="bg-gray-50 min-h-screen py-12">
@@ -147,12 +147,12 @@ const Promotions: React.FC = () => {
                                     <p className="mb-6">Trở thành thành viên của CinemaHub để nhận ngay các ưu đãi độc quyền và tích lũy điểm với mỗi lần đặt vé!</p>
                                     <div className="flex flex-col sm:flex-row gap-4">
                                         <Link to="/register">
-                                            <Button variant="outline" className="text-white border-white hover:bg-white hover:text-purple-600 transition-colors">
+                                            <Button variant="outline" className="text-white border-white hover:bg-red-600 hover:text-purple-600 transition-colors">
                                                 Đăng ký ngay
                                             </Button>
                                         </Link>
                                         <Link to="/movies">
-                                            <Button variant="secondary" className="bg-white text-purple-600 hover:bg-gray-100">
+                                            <Button variant="secondary" className="bg-gray-100 text-purple-600 hover:bg-gray-600">
                                                 Đặt vé
                                             </Button>
                                         </Link>
@@ -170,7 +170,7 @@ const Promotions: React.FC = () => {
                         </div>
                     ) : error ? (
                         <div className="text-center py-8 text-red-500">{error}</div>
-                    ) : filteredPromotions.length === 0 ? (
+                    ) : promotions.length === 0 ? (
                         <div className="bg-white rounded-lg shadow-sm p-8 text-center">
                             <svg
                                 className="mx-auto h-12 w-12 text-gray-400"
@@ -202,7 +202,7 @@ const Promotions: React.FC = () => {
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {filteredPromotions.map((promotion) => {
+                            {promotions.map((promotion) => {
                                 const isActive = new Date() >= new Date(promotion.startDate) && new Date() <= new Date(promotion.endDate);
                                 const isUpcoming = new Date() < new Date(promotion.startDate);
                                 const remainingDays = isActive ? getRemainingDays(promotion.endDate) : null;
