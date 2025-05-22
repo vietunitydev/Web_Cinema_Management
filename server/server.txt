@@ -1,0 +1,46 @@
+cinema-management-api/
+├── src/
+│   ├── config/
+│   │   ├── db.js                # Cấu hình kết nối MongoDB
+│   │   ├── cloudinary.js        # Cấu hình Cloudinary
+│   │   └── index.js             # Các cấu hình chung
+│   ├── controllers/
+│   │   ├── authController.js    # Xử lý đăng nhập, đăng ký
+│   │   ├── movieController.js   # Xử lý quản lý phim
+│   │   ├── cinemaController.js  # Xử lý quản lý rạp
+│   │   ├── showtimeController.js # Xử lý lịch chiếu
+│   │   ├── bookingController.js # Xử lý đặt vé
+│   │   ├── userController.js    # Xử lý người dùng
+│   │   ├── reviewController.js  # Xử lý đánh giá
+│   │   └── promotionController.js # Xử lý khuyến mãi
+│   ├── middlewares/
+│   │   ├── auth.js              # Middleware xác thực JWT
+│   │   ├── upload.js            # Middleware upload ảnh
+│   │   ├── validate.js          # Middleware validate dữ liệu
+│   │   └── errorHandler.js      # Middleware xử lý lỗi
+│   ├── models/
+│   │   ├── User.js              # Schema người dùng
+│   │   ├── Movie.js             # Schema phim
+│   │   ├── Cinema.js            # Schema rạp chiếu phim
+│   │   ├── Showtime.js          # Schema lịch chiếu
+│   │   ├── Booking.js           # Schema đặt vé
+│   │   ├── Review.js            # Schema đánh giá
+│   │   └── Promotion.js         # Schema khuyến mãi
+│   ├── routes/
+│   │   ├── authRoutes.js        # Route xác thực
+│   │   ├── movieRoutes.js       # Route quản lý phim
+│   │   ├── cinemaRoutes.js      # Route quản lý rạp
+│   │   ├── showtimeRoutes.js    # Route lịch chiếu
+│   │   ├── bookingRoutes.js     # Route đặt vé
+│   │   ├── userRoutes.js        # Route người dùng
+│   │   ├── reviewRoutes.js      # Route đánh giá
+│   │   └── promotionRoutes.js   # Route khuyến mãi
+│   ├── utils/
+│   │   ├── generateToken.js     # Tạo JWT token
+│   │   ├── catchAsync.js        # Xử lý async/await
+│   │   └── apiFeatures.js       # Các chức năng API (sort, filter...)
+│   ├── app.js                   # Cấu hình Express app
+│   └── server.js                # Khởi tạo server
+├── package.json
+├── .env                         # Biến môi trường
+└── README.md
