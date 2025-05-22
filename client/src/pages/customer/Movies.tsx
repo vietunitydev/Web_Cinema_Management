@@ -64,14 +64,6 @@ const Movies: React.FC = () => {
                     setMovies(response.data.data);
                     setTotalItems(response.data.totalCount);
                     setTotalPages(response.data.totalPages);
-
-                    // Extract unique genres from movies for filter
-                    if (movies.length > 0 && genres.length === 0) {
-                        const uniqueGenres = Array.from(
-                            new Set(movies.flatMap(movie => movie.genre))
-                        ).sort();
-                        setGenres(uniqueGenres);
-                    }
                 }
             } catch{
                 setError('Không thể tải danh sách phim. Vui lòng thử lại sau.');
@@ -85,12 +77,26 @@ const Movies: React.FC = () => {
         // Update URL with current filters
         const params = new URLSearchParams();
         if (currentPage > 1) params.set('page', currentPage.toString());
-        if (selectedGenre) params.set('genre', selectedGenre);
+        if (selectedGenre) params.set('genre', selectedGenre.toString());
         if (searchQuery) params.set('query', searchQuery);
 
         const newUrl = `${location.pathname}${params.toString() ? `?${params.toString()}` : ''}`;
         navigate(newUrl, { replace: true });
     }, [currentPage, selectedGenre, searchQuery, isComingSoon, isTopRated, location.pathname]);
+
+    useEffect(() => {
+       const setGen = () => {
+            // Extract unique genres from movies for filter
+            if (movies.length > 0 && genres.length === 0) {
+                const uniqueGenres = Array.from(
+                    new Set(movies.flatMap(movie => movie.genre))
+                ).sort();
+                setGenres(uniqueGenres);
+            }
+       }
+
+       setGen();
+    }, [movies]);
 
     // Handle page change
     const handlePageChange = (page: number) => {

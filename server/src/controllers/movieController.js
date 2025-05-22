@@ -230,39 +230,51 @@ exports.getComingSoon = catchAsync(async (req, res, next) => {
  * @access  Public
  */
 exports.searchMovies = catchAsync(async (req, res, next) => {
-    const { query } = req.query;
+    const { query, page = 1, limit = 10 } = req.query;
 
-    if (!query) {
+    // Validate query parameter
+    if (!query || query.trim() === '') {
         return next(new AppError('Vui lòng nhập từ khóa tìm kiếm', 400));
     }
 
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
+    // Parse and validate pagination parameters
+    const pageNum = Math.max(1, parseInt(page) || 1);
+    const limitNum = Math.max(1, Math.min(100, parseInt(limit) || 10)); // Giới hạn tối đa 100 items/page
+    const skip = (pageNum - 1) * limitNum;
 
+    // Trim and escape special regex characters if needed
+    const searchTerm = query.trim();
+
+    // Build search query
     const searchQuery = {
         $or: [
-            { title: { $regex: query, $options: 'i' } },
-            { director: { $regex: query, $options: 'i' } },
-            { cast: { $in: [new RegExp(query, 'i')] } },
-            { genre: { $in: [new RegExp(query, 'i')] } }
+            { title: { $regex: searchTerm, $options: 'i' } },
+            { director: { $regex: searchTerm, $options: 'i' } },
+            { cast: { $elemMatch: { $regex: searchTerm, $options: 'i' } } },
+            { genre: { $elemMatch: { $regex: searchTerm, $options: 'i' } } }
         ]
     };
 
-    const data = await Movie.find(searchQuery)
-        .skip(skip)
-        .limit(limit);
+    // Execute search and count in parallel for better performance
+    const [movies, totalCount] = await Promise.all([
+        Movie.find(searchQuery)
+            .select('-__v') // Exclude version field
+            .skip(skip)
+            .limit(limitNum)
+            .lean(), // Use lean() for better performance if you don't need mongoose documents
+        Movie.countDocuments(searchQuery)
+    ]);
 
-    const totalCount = await Movie.countDocuments(searchQuery);
-    const totalPages = Math.ceil(totalCount / limit);
+    // Calculate pagination info
+    const totalPages = Math.ceil(totalCount / limitNum);
 
     res.status(200).json({
         status: 'success',
         data: {
-            data,
+            data: movies,
             totalCount,
-            page,
-            limit,
+            page: pageNum,
+            limit: limitNum,
             totalPages
         }
     });
