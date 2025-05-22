@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { showtimeService } from '../../services/showtimeService';
 import { movieService } from '../../services/movieService';
 import { cinemaService } from '../../services/cinemaService';
-import type { Movie, Cinema, Hall, Showtime } from '../../types/models';
+import type { MovieOption, CinemaOption, Hall, Showtime } from '../../types/models';
 import Button from '../../components/common/Button';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { toast } from 'react-toastify';
@@ -41,8 +41,8 @@ const ShowtimeForm: React.FC = () => {
     });
 
     // State for options and loading
-    const [movies, setMovies] = useState<Movie[]>([]);
-    const [cinemas, setCinemas] = useState<Cinema[]>([]);
+    const [movieOptions, setMovieOptions] = useState<MovieOption[]>([]);
+    const [cinemaOptions, setCinemaOptions] = useState<CinemaOption[]>([]);
     const [halls, setHalls] = useState<Hall[]>([]);
     const [loading, setLoading] = useState({
         formData: false,
@@ -57,13 +57,13 @@ const ShowtimeForm: React.FC = () => {
         submit: null,
     });
 
-    // Fetch movies and cinemas when component mounts
+    // Fetch movie and cinema options when component mounts
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchOptions = async () => {
+            // Fetch movie options
             try {
-
-                const moviesResponse = await movieService.getAllMovies();
-                setMovies(moviesResponse.data?.data || []);
+                const movieOptionsResponse = await movieService.getMovieOptions();
+                setMovieOptions(movieOptionsResponse.data || []);
                 setError((prev) => ({ ...prev, movies: null }));
             } catch {
                 setError((prev) => ({ ...prev, movies: 'Không thể tải danh sách phim' }));
@@ -71,9 +71,10 @@ const ShowtimeForm: React.FC = () => {
                 setLoading((prev) => ({ ...prev, movies: false }));
             }
 
+            // Fetch cinema options
             try {
-                const cinemasResponse = await cinemaService.getAllCinemas();
-                setCinemas(cinemasResponse.data?.data || []);
+                const cinemaOptionsResponse = await cinemaService.getCinemaOptions();
+                setCinemaOptions(cinemaOptionsResponse.data || []);
                 setError((prev) => ({ ...prev, cinemas: null }));
             } catch {
                 setError((prev) => ({ ...prev, cinemas: 'Không thể tải danh sách rạp' }));
@@ -82,7 +83,7 @@ const ShowtimeForm: React.FC = () => {
             }
         };
 
-        fetchData();
+        fetchOptions();
     }, []);
 
     // Fetch halls when cinema is selected
@@ -94,9 +95,9 @@ const ShowtimeForm: React.FC = () => {
             }
 
             try {
-                const hallsResponse = await cinemaService.getCinemaHalls(formData.cinemaId._id);
+                const hallsResponse = await cinemaService.getCinemaHalls(formData.cinemaId);
                 setHalls(hallsResponse.data || []);
-            } catch{
+            } catch {
                 toast.error('Không thể tải danh sách phòng chiếu');
             }
         };
@@ -124,8 +125,8 @@ const ShowtimeForm: React.FC = () => {
                 const endTime = new Date(showtime.endTime);
 
                 setFormData({
-                    movieId: showtime.movieId,
-                    cinemaId: showtime.cinemaId,
+                    movieId: typeof showtime.movieId === 'object' ? showtime.movieId._id : showtime.movieId,
+                    cinemaId: typeof showtime.cinemaId === 'object' ? showtime.cinemaId._id : showtime.cinemaId,
                     hallId: showtime.hallId,
                     startTime: format(startTime, "yyyy-MM-dd'T'HH:mm"),
                     endTime: format(endTime, "yyyy-MM-dd'T'HH:mm"),
@@ -215,8 +216,8 @@ const ShowtimeForm: React.FC = () => {
     const calculateEndTime = () => {
         if (!formData.movieId || !formData.startTime) return;
 
-        const selectedMovie = movies.find((movie) => movie._id === formData.movieId);
-        if (!selectedMovie) return;
+        const selectedMovie = movieOptions.find((movie) => movie._id === formData.movieId);
+        if (!selectedMovie || !selectedMovie.duration) return;
 
         const startTime = new Date(formData.startTime);
         const endTime = new Date(startTime.getTime() + selectedMovie.duration * 60000); // Add duration in milliseconds
@@ -230,7 +231,7 @@ const ShowtimeForm: React.FC = () => {
     // Effect to auto-calculate end time when movie or start time changes
     useEffect(() => {
         calculateEndTime();
-    }, [formData.movieId, formData.startTime]);
+    }, [formData.movieId, formData.startTime, movieOptions]);
 
     // Handle form submission
     const handleSubmit = async (e: React.FormEvent) => {
@@ -328,9 +329,9 @@ const ShowtimeForm: React.FC = () => {
                             required
                         >
                             <option value="">Chọn phim</option>
-                            {movies.map((movie) => (
+                            {movieOptions.map((movie) => (
                                 <option key={movie._id} value={movie._id}>
-                                    {movie.title} ({movie.duration} phút)
+                                    {movie.title} {movie.duration && `(${movie.duration} phút)`}
                                 </option>
                             ))}
                         </select>
@@ -359,7 +360,7 @@ const ShowtimeForm: React.FC = () => {
                                 required
                             >
                                 <option value="">Chọn rạp</option>
-                                {cinemas.map((cinema) => (
+                                {cinemaOptions.map((cinema) => (
                                     <option key={cinema._id} value={cinema._id}>
                                         {cinema.name}
                                     </option>
