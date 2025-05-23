@@ -61,6 +61,7 @@ const CinemaForm: React.FC = () => {
                 setLoading(true);
                 const response = await cinemaService.getCinemaById(id!);
                 const cinema = response.data;
+                // console.log(response.data);
 
                 if (cinema) {
                     setFormData({

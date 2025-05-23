@@ -43,9 +43,7 @@ exports.getCinema = catchAsync(async (req, res, next) => {
 
     res.status(200).json({
         status: 'success',
-        data: {
-            cinema
-        }
+        data: cinema
     });
 });
 
@@ -59,9 +57,7 @@ exports.createCinema = catchAsync(async (req, res, next) => {
 
     res.status(201).json({
         status: 'success',
-        data: {
-            cinema: newCinema
-        }
+        data: newCinema
     });
 });
 
@@ -82,9 +78,7 @@ exports.updateCinema = catchAsync(async (req, res, next) => {
 
     res.status(200).json({
         status: 'success',
-        data: {
-            cinema
-        }
+        data: cinema
     });
 });
 
