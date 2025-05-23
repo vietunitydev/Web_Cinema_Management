@@ -20,6 +20,7 @@ const BookingConfirmation: React.FC = () => {
 
             try {
                 const response = await bookingService.getBookingById(id);
+                console.log(response.data);
                 setBooking(response.data ?? null);
                 setLoading(false);
             } catch {
@@ -45,7 +46,7 @@ const BookingConfirmation: React.FC = () => {
         );
     }
 
-    if (error || !booking || !booking.movie || !booking.cinema || !booking.showtime) {
+    if (error || !booking || !booking.movieId || !booking.cinemaId || !booking.showtimeId) {
         return (
             <div className="container mx-auto px-4 py-16 text-center">
                 <h2 className="text-2xl font-bold text-red-600 mb-4">
@@ -116,29 +117,29 @@ const BookingConfirmation: React.FC = () => {
                             <div className="flex">
                                 <div className="w-24 h-36 flex-shrink-0 rounded overflow-hidden mr-4">
                                     <img
-                                        src={booking.movie.posterUrl}
-                                        alt={booking.movie.title}
+                                        src={booking.movieId.posterUrl}
+                                        alt={booking.movieId.title}
                                         className="w-full h-full object-cover"
                                     />
                                 </div>
                                 <div>
-                                    <h4 className="font-bold text-lg">{booking.movie.title}</h4>
-                                    <p className="text-gray-600 mb-2">
-                                        {booking.movie.duration} phút • {booking.movie.genre.join(', ')} • {booking.movie.ageRestriction}
-                                    </p>
+                                    <h4 className="font-bold text-lg">{booking.movieId.title}</h4>
+                                    {/*<p className="text-gray-600 mb-2">*/}
+                                    {/*    {booking.movieId.duration} phút • {booking.movieId.genre.join(', ')} • {booking.movieId.ageRestriction}*/}
+                                    {/*</p>*/}
                                     <p className="mb-2">
                                         <span className="text-gray-600">Rạp:</span>{' '}
-                                        <span className="font-medium">{booking.cinema.name}</span>
+                                        <span className="font-medium">{booking.cinemaId.name}</span>
                                     </p>
                                     <p className="mb-2">
                                         <span className="text-gray-600">Suất chiếu:</span>{' '}
-                                        <span className="font-medium">{formatDateTime(booking.showtime.startTime)}</span>
+                                        <span className="font-medium">{formatDateTime(booking.showtimeId.startTime)}</span>
                                     </p>
                                     <p className="mb-2">
                                         <span className="text-gray-600">Định dạng:</span>{' '}
-                                        <span className="font-medium">{booking.showtime.format}</span>
-                                        {booking.showtime.language && (
-                                            <span> • {booking.showtime.language}</span>
+                                        <span className="font-medium">{booking.showtimeId.format}</span>
+                                        {booking.showtimeId.language && (
+                                            <span> • {booking.showtimeId.language}</span>
                                         )}
                                     </p>
                                     <p>

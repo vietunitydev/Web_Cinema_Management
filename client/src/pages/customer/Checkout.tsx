@@ -111,6 +111,7 @@ const Checkout: React.FC = () => {
 
             // Clear booking data from session storage
             sessionStorage.removeItem('bookingData');
+            console.log(response.data)
 
             // Redirect to booking confirmation page
             navigate(`/booking-confirmation/${response.data?._id}`);
