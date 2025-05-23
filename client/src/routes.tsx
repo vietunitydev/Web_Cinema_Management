@@ -18,6 +18,7 @@ import ResetPassword from './pages/auth/ResetPassword';
 import Home from './pages/customer/Home';
 import Movies from './pages/customer/Movies';
 import MovieDetail from './pages/customer/MovieDetail';
+import MovieReviews from './pages/customer/MovieReviews';
 import Cinemas from './pages/customer/Cinemas';
 import CinemaDetail from './pages/customer/CinemaDetail';
 import ShowtimeSelection from './pages/customer/ShowtimeSelection';
@@ -47,6 +48,7 @@ import AdminUsers from './pages/admin/Users';
 import AdminUserForm from './pages/admin/UserForm';
 import AdminPromotions from './pages/admin/Promotions';
 import AdminPromotionForm from './pages/admin/PromotionForm';
+// import AdminReviews from './pages/admin/Reviews';
 import AdminReports from './pages/admin/Reports';
 
 // Error Pages
@@ -130,6 +132,10 @@ export const routes: RouteObject[] = [
             {
                 path: '/movies/:id',
                 element: <MovieDetail />,
+            },
+            {
+                path: '/movies/:id/reviews',
+                element: <MovieReviews />,
             },
             {
                 path: '/cinemas',
@@ -431,6 +437,16 @@ export const routes: RouteObject[] = [
             </ProtectedRoute>
         ),
     },
+    // {
+    //     path: '/admin/reviews',
+    //     element: (
+    //         <ProtectedRoute requiredRole="admin">
+    //             <AdminLayout>
+    //                 <AdminReviews />
+    //             </AdminLayout>
+    //         </ProtectedRoute>
+    //     ),
+    // },
     {
         path: '/admin/reports',
         element: (
