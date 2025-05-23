@@ -213,14 +213,18 @@ const ShowtimeForm: React.FC = () => {
     };
 
     // Calculate end time based on movie duration
-    const calculateEndTime = () => {
+    const calculateEndTime = async () => {
+        console.log(formData.movieId, formData.startTime)
         if (!formData.movieId || !formData.startTime) return;
 
-        const selectedMovie = movieOptions.find((movie) => movie._id === formData.movieId);
-        if (!selectedMovie || !selectedMovie.duration) return;
+        // const selectedMovie = movieOptions.find((movie) => movie._id === formData.movieId);
+        const response = await movieService.getMovieById(formData.movieId);
+        const duration = response.data.duration;
+
+        if (!duration) return;
 
         const startTime = new Date(formData.startTime);
-        const endTime = new Date(startTime.getTime() + selectedMovie.duration * 60000); // Add duration in milliseconds
+        const endTime = new Date(startTime.getTime() + duration * 60000); // Add duration in milliseconds
 
         setFormData({
             ...formData,
