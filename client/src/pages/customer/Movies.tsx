@@ -1,8 +1,7 @@
-// src/pages/customer/Movies.tsx
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { movieService, type MovieFilters } from '../../services/movieService';
-import {type Movie } from '../../types/models';
+import { type Movie, type MovieOption } from '../../types/models';
 import MovieCard from '../../components/common/MovieCard';
 import Pagination from '../../components/common/Pagination';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -27,12 +26,34 @@ const Movies: React.FC = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
     const [currentPage, setCurrentPage] = useState(initialPage);
-    const [selectedGenre, setSelectedGenre] = useState(initialGenre);
-    const [searchQuery, setSearchQuery] = useState(initialQuery);
+    const [filters, setFilters] = useState<MovieFilters>({
+        title: initialQuery,
+        genre: initialGenre,
+        page: initialPage,
+        limit: 12,
+    });
     const [genres, setGenres] = useState<string[]>([]);
     const [tempSearchQuery, setTempSearchQuery] = useState(initialQuery);
 
-    const itemsPerPage = 12;
+    // Fetch genres using getMovieOptions
+    useEffect(() => {
+        const fetchGenres = async () => {
+            try {
+                const response = await movieService.getMovieOptions();
+                if (response.data) {
+                    // Assuming MovieOption contains a 'genre' field or similar
+                    const uniqueGenres = Array.from(
+                        new Set(response.data.map((option: MovieOption) => option.genre).filter(Boolean))
+                    ).sort();
+                    setGenres(uniqueGenres);
+                }
+            } catch {
+                console.error('Không thể tải danh sách thể loại.');
+            }
+        };
+
+        fetchGenres();
+    }, []);
 
     // Fetch movies based on filters
     useEffect(() => {
@@ -42,21 +63,19 @@ const Movies: React.FC = () => {
 
             try {
                 let response;
-                const filters: MovieFilters = {
+                const currentFilters: MovieFilters = {
+                    ...filters,
                     page: currentPage,
-                    limit: itemsPerPage,
-                    genre: selectedGenre || undefined,
+                    limit: 12,
                 };
 
                 // Determine which API endpoint to call based on the route
                 if (isComingSoon) {
-                    response = await movieService.getComingSoon(currentPage, itemsPerPage);
+                    response = await movieService.getComingSoon(currentPage, 12);
                 } else if (isTopRated) {
-                    response = await movieService.getTopRated(currentPage, itemsPerPage);
-                } else if (searchQuery) {
-                    response = await movieService.searchMovies(searchQuery, currentPage, itemsPerPage);
+                    response = await movieService.getTopRated(currentPage, 12);
                 } else {
-                    response = await movieService.getAllMovies(filters);
+                    response = await movieService.getAllMovies(currentFilters);
                 }
 
                 // Update state with fetched data
@@ -65,7 +84,7 @@ const Movies: React.FC = () => {
                     setTotalItems(response.data.totalCount);
                     setTotalPages(response.data.totalPages);
                 }
-            } catch{
+            } catch {
                 setError('Không thể tải danh sách phim. Vui lòng thử lại sau.');
             } finally {
                 setLoading(false);
@@ -77,26 +96,12 @@ const Movies: React.FC = () => {
         // Update URL with current filters
         const params = new URLSearchParams();
         if (currentPage > 1) params.set('page', currentPage.toString());
-        if (selectedGenre) params.set('genre', selectedGenre.toString());
-        if (searchQuery) params.set('query', searchQuery);
+        if (filters.genre) params.set('genre', filters.genre);
+        if (filters.title) params.set('query', filters.title);
 
         const newUrl = `${location.pathname}${params.toString() ? `?${params.toString()}` : ''}`;
         navigate(newUrl, { replace: true });
-    }, [currentPage, selectedGenre, searchQuery, isComingSoon, isTopRated, location.pathname]);
-
-    useEffect(() => {
-       const setGen = () => {
-            // Extract unique genres from movies for filter
-            if (movies.length > 0 && genres.length === 0) {
-                const uniqueGenres = Array.from(
-                    new Set(movies.flatMap(movie => movie.genre))
-                ).sort();
-                setGenres(uniqueGenres);
-            }
-       }
-
-       setGen();
-    }, [movies]);
+    }, [currentPage, filters, isComingSoon, isTopRated, location.pathname]);
 
     // Handle page change
     const handlePageChange = (page: number) => {
@@ -106,21 +111,33 @@ const Movies: React.FC = () => {
 
     // Handle genre filter change
     const handleGenreChange = (genre: string) => {
-        setSelectedGenre(genre === selectedGenre ? '' : genre);
+        setFilters(prev => ({
+            ...prev,
+            genre: genre === prev.genre ? '' : genre,
+            page: 1,
+        }));
         setCurrentPage(1);
     };
 
     // Handle search form submission
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        setSearchQuery(tempSearchQuery);
+        setFilters(prev => ({
+            ...prev,
+            title: tempSearchQuery,
+            page: 1,
+        }));
         setCurrentPage(1);
     };
 
     // Clear all filters
     const clearFilters = () => {
-        setSelectedGenre('');
-        setSearchQuery('');
+        setFilters({
+            title: '',
+            genre: '',
+            page: 1,
+            limit: 12,
+        });
         setTempSearchQuery('');
         setCurrentPage(1);
     };
@@ -129,7 +146,7 @@ const Movies: React.FC = () => {
     const getPageTitle = () => {
         if (isComingSoon) return 'Phim sắp chiếu';
         if (isTopRated) return 'Phim đánh giá cao';
-        if (searchQuery) return `Kết quả tìm kiếm: "${searchQuery}"`;
+        if (filters.title) return `Kết quả tìm kiếm: "${filters.title}"`;
         return 'Tất cả phim';
     };
 
@@ -177,7 +194,7 @@ const Movies: React.FC = () => {
                             <div className="flex-shrink-0">
                                 <select
                                     className="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
-                                    value={selectedGenre}
+                                    value={filters.genre}
                                     onChange={(e) => handleGenreChange(e.target.value)}
                                 >
                                     <option value="">Tất cả thể loại</option>
@@ -190,7 +207,7 @@ const Movies: React.FC = () => {
                             </div>
 
                             {/* Clear Filters Button */}
-                            {(selectedGenre || searchQuery) && (
+                            {(filters.genre || filters.title) && (
                                 <Button
                                     variant="outline"
                                     size="md"
@@ -252,7 +269,7 @@ const Movies: React.FC = () => {
                         totalPages={totalPages}
                         onPageChange={handlePageChange}
                         totalItems={totalItems}
-                        itemsPerPage={itemsPerPage}
+                        itemsPerPage={filters.limit || 12}
                     />
                 )}
             </div>
