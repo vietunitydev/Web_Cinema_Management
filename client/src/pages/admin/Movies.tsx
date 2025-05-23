@@ -35,7 +35,7 @@ const Movies: React.FC = () => {
             setError(null);
 
             try {
-                console.log(filters);
+                // console.log(filters);
                 const response = await movieService.getAllMovies({
                     ...filters,
                     page: currentPage,
