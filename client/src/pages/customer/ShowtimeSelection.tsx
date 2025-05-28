@@ -119,11 +119,11 @@ const ShowtimeSelection: React.FC = () => {
         };
     }>((acc, showtime) => {
         // Skip if the cinema information is not available
-        if (!showtime.cinema) return acc;
+        if (!showtime.cinemaId) return acc;
 
-        const cinemaId = showtime.cinema._id;
-        const cinemaName = showtime.cinema.name;
-        const address = showtime.cinema.location.address;
+        const cinemaId = showtime.cinemaId._id;
+        const cinemaName = showtime.cinemaId.name;
+        const address = showtime.cinemaId.location.address;
         const format = showtime.format;
 
         // Initialize cinema group if it doesn't exist
