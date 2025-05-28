@@ -27,7 +27,7 @@ router.route('/:id')
 router.use(authMiddleware.restrictTo('admin', 'manager'));
 
 // Quản lý đánh giá
-router.get('/pending', reviewController.getPendingReviews);
+router.get('/get/pending', reviewController.getPendingReviews);
 router.patch('/:id/approve', reviewController.approveReview);
 router.patch('/:id/reject', reviewController.rejectReview);
 

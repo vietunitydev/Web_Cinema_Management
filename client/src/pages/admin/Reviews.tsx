@@ -37,7 +37,8 @@ const AdminReviews: React.FC = () => {
     const fetchAllReviews = async () => {
         try {
             setLoading(prev => ({ ...prev, all: true }));
-            const response = await reviewService.getAllReviews(undefined, currentPage, 10);
+            const response = await reviewService.getAllReviews( currentPage, 10);
+            console.log(response);
             setReviews(response.data.data || []);
             setTotalPages(response.data.totalPages || 1);
         } catch {
@@ -51,6 +52,7 @@ const AdminReviews: React.FC = () => {
         try {
             setLoading(prev => ({ ...prev, pending: true }));
             const response = await reviewService.getPendingReviews(currentPage, 10);
+            console.log(response);
             setPendingReviews(response.data.data || []);
             setTotalPages(response.data.totalPages || 1);
         } catch {

@@ -35,7 +35,7 @@ export const reviewService = {
 
     // Admin/Manager methods
     getPendingReviews: (page = 1, limit = 10) =>
-        api.get<ApiResponse<PaginatedResponse<Review>>>('/reviews/pending', {
+        api.get<ApiResponse<PaginatedResponse<Review>>>('/reviews/get/pending', {
             params: { page, limit }
         }),
 

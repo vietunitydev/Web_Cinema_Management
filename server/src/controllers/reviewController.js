@@ -30,11 +30,20 @@ exports.getAllReviews = catchAsync(async (req, res, next) => {
 
     const reviews = await features.query;
 
+    const totalCount = await Review.countDocuments(features.queryObj);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const totalPages = Math.ceil(totalCount / limit);
+
+    // Trả về kết quả
     res.status(200).json({
         status: 'success',
-        results: reviews.length,
         data: {
-            reviews
+            data: reviews,
+            totalCount,
+            page,
+            limit,
+            totalPages
         }
     });
 });
@@ -291,11 +300,21 @@ exports.getPendingReviews = catchAsync(async (req, res, next) => {
 
     const reviews = await features.query;
 
+    const totalCount = await Review.countDocuments(features.queryObj);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const totalPages = Math.ceil(totalCount / limit);
+
+    // Trả về kết quả
     res.status(200).json({
         status: 'success',
-        results: reviews.length,
         data: {
-            reviews
+            data: reviews,
+            totalCount,
+            page,
+            limit,
+            totalPages
         }
     });
+
 });
