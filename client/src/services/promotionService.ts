@@ -3,10 +3,16 @@ import api from './api';
 import type {ApiResponse, PaginatedResponse, Promotion} from '../types/models';
 
 export interface PromotionCheckResult {
-    valid: boolean;
-    promotion?: Promotion;
-    discountAmount?: number;
-    message?: string;
+    data: Promotion;
+    discountAmount: number;
+    finalAmount: number;
+}
+
+export interface CheckCouponRequest {
+    couponCode: string;
+    totalAmount: number;
+    movieId?: string;
+    cinemaId?: string;
 }
 
 export const promotionService = {
@@ -23,10 +29,8 @@ export const promotionService = {
     getPromotionById: (id: string) =>
         api.get<ApiResponse<Promotion>>(`/promotions/${id}`),
 
-    checkCoupon: (couponCode: string, amount: number) =>
-        api.post<ApiResponse<PromotionCheckResult>>('/promotions/check-coupon', {
-            couponCode, amount
-        }),
+    checkCoupon: (request: CheckCouponRequest) =>
+        api.post<ApiResponse<PromotionCheckResult>>('/promotions/check-coupon', request),
 
     getPromotionByCouponCode: (couponCode: string) =>
         api.get<ApiResponse<Promotion>>(`/promotions/coupon/${couponCode}`),

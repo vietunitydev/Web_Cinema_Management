@@ -145,6 +145,8 @@ exports.deletePromotion = catchAsync(async (req, res, next) => {
 exports.checkCoupon = catchAsync(async (req, res, next) => {
     const { couponCode, movieId, cinemaId, totalAmount } = req.body;
 
+    console.log('Check coupon request:', req.body);
+
     if (!couponCode) {
         return next(new AppError('Vui lòng cung cấp mã khuyến mãi', 400));
     }
@@ -174,13 +176,14 @@ exports.checkCoupon = catchAsync(async (req, res, next) => {
 
     // Tính toán số tiền giảm
     const discountAmount = promotion.calculateDiscount(totalAmount);
+    const finalAmount = totalAmount - discountAmount;
 
     res.status(200).json({
         status: 'success',
         data: {
-            promotion,
+            data: promotion,
             discountAmount,
-            finalAmount: totalAmount - discountAmount
+            finalAmount
         }
     });
 });

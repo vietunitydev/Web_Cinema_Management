@@ -7,6 +7,7 @@ const Promotion = require('../models/Promotion');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const APIFeatures = require('../utils/apiFeatures');
+const mongoose = require('mongoose');
 
 /**
  * @desc    Lấy tất cả đơn đặt vé
@@ -63,89 +64,152 @@ exports.getBooking = catchAsync(async (req, res, next) => {
  */
 exports.createBooking = catchAsync(async (req, res, next) => {
     // Lấy thông tin từ request body
-    const { showtimeId, seats, promotionId } = req.body;
+    const { showtimeId, seats, promotionCode, paymentMethod } = req.body;
 
-    // Kiểm tra suất chiếu
-    const showtime = await Showtime.findById(showtimeId);
-    if (!showtime) {
-        return next(new AppError('Không tìm thấy suất chiếu với ID này', 404));
+    // Validation cơ bản
+    if (!showtimeId || !seats || !Array.isArray(seats) || seats.length === 0) {
+        return next(new AppError('Vui lòng cung cấp đầy đủ thông tin đặt vé', 400));
     }
 
-    // Kiểm tra trạng thái suất chiếu
-    if (showtime.status !== 'open') {
-        return next(new AppError('Suất chiếu này không khả dụng', 400));
+    if (!paymentMethod) {
+        return next(new AppError('Vui lòng chọn phương thức thanh toán', 400));
     }
 
-    // Kiểm tra ghế đã được đặt chưa
-    for (const seat of seats) {
-        if (!showtime.availableSeats.includes(seat)) {
-            return next(new AppError(`Ghế ${seat} không khả dụng hoặc đã được đặt`, 400));
-        }
-    }
+    // Bắt đầu transaction để đảm bảo data consistency
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-    // Tính toán giá tiền
-    // Giả sử tất cả ghế có cùng giá (vé thường)
-    const pricePerSeat = showtime.price.regular;
-    let totalAmount = pricePerSeat * seats.length;
-    let discountAmount = 0;
-    let finalAmount = totalAmount;
+    try {
+        // Kiểm tra suất chiếu
+        const showtime = await Showtime.findById(showtimeId)
+            .populate('movieId', 'title')
+            .populate('cinemaId', 'name')
+            .session(session);
 
-    // Xử lý khuyến mãi nếu có
-    if (promotionId) {
-        const promotion = await Promotion.findById(promotionId);
-
-        if (!promotion) {
-            return next(new AppError('Không tìm thấy khuyến mãi với ID này', 404));
+        if (!showtime) {
+            return next(new AppError('Không tìm thấy suất chiếu với ID này', 404));
         }
 
-        // Kiểm tra khuyến mãi có áp dụng được không
-        const orderDetails = {
+        // Kiểm tra trạng thái suất chiếu
+        if (showtime.status !== 'open') {
+            return next(new AppError('Suất chiếu này không khả dụng', 400));
+        }
+
+        // Kiểm tra thời gian đặt vé (không cho phép đặt vé sau khi suất chiếu đã bắt đầu)
+        const now = new Date();
+        if (now >= showtime.startTime) {
+            return next(new AppError('Không thể đặt vé cho suất chiếu đã bắt đầu', 400));
+        }
+
+        // Kiểm tra ghế đã được đặt chưa (re-check để tránh race condition)
+        const currentShowtime = await Showtime.findById(showtimeId).session(session);
+        for (const seat of seats) {
+            if (!currentShowtime.availableSeats.includes(seat)) {
+                return next(new AppError(`Ghế ${seat} không khả dụng hoặc đã được đặt`, 400));
+            }
+        }
+
+        // Tính toán giá tiền
+        const pricePerSeat = showtime.price.regular;
+        let totalAmount = pricePerSeat * seats.length;
+        let discountAmount = 0;
+        let finalAmount = totalAmount;
+        let promotionId = null;
+
+        // Xử lý khuyến mãi nếu có
+        if (promotionCode) {
+            const promotion = await Promotion.findOne({
+                couponCode: promotionCode.toUpperCase(),
+                status: 'active'
+            }).session(session);
+
+            if (!promotion) {
+                return next(new AppError('Mã khuyến mãi không hợp lệ hoặc đã hết hạn', 404));
+            }
+
+            // Kiểm tra khuyến mãi có áp dụng được không
+            const orderDetails = {
+                totalAmount,
+                movieId: showtime.movieId._id,
+                cinemaId: showtime.cinemaId._id,
+                date: showtime.startTime
+            };
+
+            if (promotion.isApplicable(orderDetails)) {
+                discountAmount = promotion.calculateDiscount(totalAmount);
+                finalAmount = totalAmount - discountAmount;
+                promotionId = promotion._id;
+
+                // Tăng số lần sử dụng khuyến mãi
+                promotion.usageCount += 1;
+                await promotion.save({ session });
+            } else {
+                return next(new AppError('Khuyến mãi không áp dụng được cho đơn hàng này', 400));
+            }
+        }
+
+        // Tạo đơn đặt vé
+        const booking = await Booking.create([{
+            userId: req.user._id,
+            showtimeId,
+            movieId: showtime.movieId._id,
+            cinemaId: showtime.cinemaId._id,
+            hallId: showtime.hallId,
+            seats,
             totalAmount,
-            movieId: showtime.movieId,
-            cinemaId: showtime.cinemaId,
-            date: showtime.startTime
-        };
+            discount: {
+                promotionId,
+                amount: discountAmount
+            },
+            finalAmount,
+            paymentMethod,
+            status: paymentMethod === 'Cash' ? 'pending' : 'confirmed'
+        }], { session });
 
-        if (promotion.isApplicable(orderDetails)) {
-            discountAmount = promotion.calculateDiscount(totalAmount);
-            finalAmount = totalAmount - discountAmount;
+        // Cập nhật trạng thái ghế
+        await Showtime.findByIdAndUpdate(
+            showtimeId,
+            {
+                $pullAll: { availableSeats: seats },
+                $addToSet: { bookedSeats: { $each: seats } }
+            },
+            { session }
+        );
 
-            // Tăng số lần sử dụng khuyến mãi
-            promotion.usageCount += 1;
-            await promotion.save();
-        } else {
-            return next(new AppError('Khuyến mãi không áp dụng được cho đơn hàng này', 400));
+        // Commit transaction
+        await session.commitTransaction();
+
+        // Populate thông tin cho response
+        const populatedBooking = await Booking.findById(booking[0]._id)
+            .populate('userId', 'fullName email phone')
+            .populate('movieId', 'title posterUrl')
+            .populate('cinemaId', 'name location')
+            .populate('showtimeId', 'startTime endTime format');
+
+        res.status(201).json({
+            status: 'success',
+            data: populatedBooking
+        });
+
+    } catch (error) {
+        // Rollback transaction nếu có lỗi
+        await session.abortTransaction();
+
+        // Xử lý lỗi duplicate key (trường hợp booking code trùng)
+        if (error.code === 11000) {
+            return next(new AppError('Đã xảy ra lỗi khi tạo mã đặt vé. Vui lòng thử lại.', 500));
         }
+
+        // Xử lý lỗi validation
+        if (error.name === 'ValidationError') {
+            const errors = Object.values(error.errors).map(val => val.message);
+            return next(new AppError(errors.join('. '), 400));
+        }
+
+        return next(error);
+    } finally {
+        session.endSession();
     }
-
-    // Tạo đơn đặt vé
-    const booking = await Booking.create({
-        userId: req.user._id,
-        showtimeId,
-        movieId: showtime.movieId,
-        cinemaId: showtime.cinemaId,
-        hallId: showtime.hallId,
-        seats,
-        totalAmount,
-        discount: {
-            promotionId,
-            amount: discountAmount
-        },
-        finalAmount,
-        status: 'confirmed'
-    });
-
-    // Cập nhật trạng thái ghế (chuyển sang tạm thời đã đặt)
-    // Thực tế sẽ cần một hệ thống quản lý trạng thái đặt chỗ tạm thời
-    showtime.availableSeats = showtime.availableSeats.filter(
-        seat => !seats.includes(seat)
-    );
-    await showtime.save();
-
-    res.status(201).json({
-        status: 'success',
-        data: booking
-    });
 });
 
 /**

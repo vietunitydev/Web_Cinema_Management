@@ -15,6 +15,7 @@ interface BookingData {
     showtimeId: string;
     seats: string[];
     promoCode?: string;
+    promotionId?: string;
     subtotal: number;
     discount: number;
     total: number;
@@ -47,28 +48,36 @@ const Checkout: React.FC = () => {
     useEffect(() => {
         const storedData = sessionStorage.getItem('bookingData');
         if (!storedData) {
+            toast.error('Không tìm thấy thông tin đặt vé. Vui lòng chọn ghế lại.');
             navigate('/movies');
             return;
         }
 
-        const parsedData = JSON.parse(storedData);
-        // console.log(parsedData);
-        setBookingData(parsedData);
+        try {
+            const parsedData = JSON.parse(storedData);
+            console.log('Booking data:', parsedData);
+            setBookingData(parsedData);
 
-        // Fetch showtime details
-        const fetchShowtime = async () => {
-            try {
-                const response = await showtimeService.getShowtimeById(parsedData.showtimeId);
-                console.log(response);
-                setShowtime(response.data ?? null);
-                setLoading((prev) => ({ ...prev, showtime: false }));
-            } catch {
-                setError((prev) => ({ ...prev, showtime: 'Không thể tải thông tin suất chiếu' }));
-                setLoading((prev) => ({ ...prev, showtime: false }));
-            }
-        };
+            // Fetch showtime details
+            const fetchShowtime = async () => {
+                try {
+                    const response = await showtimeService.getShowtimeById(parsedData.showtimeId);
+                    console.log('Showtime response:', response);
+                    setShowtime(response.data ?? null);
+                    setLoading((prev) => ({ ...prev, showtime: false }));
+                } catch (err) {
+                    console.error('Error fetching showtime:', err);
+                    setError((prev) => ({ ...prev, showtime: 'Không thể tải thông tin suất chiếu' }));
+                    setLoading((prev) => ({ ...prev, showtime: false }));
+                }
+            };
 
-        fetchShowtime();
+            fetchShowtime();
+        } catch (err) {
+            console.error('Error parsing booking data:', err);
+            toast.error('Dữ liệu đặt vé không hợp lệ. Vui lòng chọn ghế lại.');
+            navigate('/movies');
+        }
     }, [navigate]);
 
     // Format date and time
@@ -107,22 +116,31 @@ const Checkout: React.FC = () => {
                 paymentMethod,
             };
 
+            console.log('Booking request data:', bookingRequestData);
+
             const response = await bookingService.createBooking(bookingRequestData);
+            console.log('Booking response:', response);
 
             // Clear booking data from session storage
             sessionStorage.removeItem('bookingData');
-            console.log(response.data)
 
             // Redirect to booking confirmation page
             navigate(`/booking-confirmation/${response.data?._id}`);
 
             toast.success('Đặt vé thành công!');
         } catch (err: any) {
-            setError((prev) => ({ ...prev, booking: err.response?.data?.message || 'Đã xảy ra lỗi khi đặt vé' }));
-            toast.error(err.response?.data?.message || 'Đã xảy ra lỗi khi đặt vé');
+            console.error('Booking error:', err);
+            const errorMessage = err.response?.data?.message || 'Đã xảy ra lỗi khi đặt vé';
+            setError((prev) => ({ ...prev, booking: errorMessage }));
+            toast.error(errorMessage);
         } finally {
             setLoading((prev) => ({ ...prev, booking: false }));
         }
+    };
+
+    // Go back to seat selection
+    const handleGoBackToSeatSelection = () => {
+        navigate(`/showtimes/${bookingData?.showtimeId}/seats`);
     };
 
     if (!user) {
@@ -138,13 +156,18 @@ const Checkout: React.FC = () => {
         );
     }
 
-    if (!bookingData || !showtime) {
+    if (error.showtime || !bookingData || !showtime) {
         return (
             <div className="container mx-auto px-4 py-16 text-center">
                 <h2 className="text-2xl font-bold text-red-600 mb-4">
-                    Không tìm thấy thông tin đặt vé
+                    {error.showtime || 'Không tìm thấy thông tin đặt vé'}
                 </h2>
-                <p className="mb-8">Thông tin đặt vé không hợp lệ hoặc đã hết hạn.</p>
+                <p className="mb-8">
+                    {error.showtime
+                        ? 'Không thể tải thông tin suất chiếu.'
+                        : 'Thông tin đặt vé không hợp lệ hoặc đã hết hạn.'
+                    }
+                </p>
                 <Link to="/movies">
                     <Button variant="primary">Quay lại danh sách phim</Button>
                 </Link>
@@ -200,7 +223,21 @@ const Checkout: React.FC = () => {
                                     <span>Ghế đã chọn</span>
                                     <span>{bookingData.seats.join(', ')}</span>
                                 </div>
+                                <div className="flex justify-between">
+                                    <span>Giá vé</span>
+                                    <span>{showtime.price.regular.toLocaleString('vi-VN')} đ</span>
+                                </div>
                             </div>
+
+                            {/* Promotion Information */}
+                            {bookingData.promoCode && bookingData.discount > 0 && (
+                                <div className="mb-4 pb-4 border-b border-gray-200">
+                                    <div className="bg-green-50 border border-green-200 text-green-800 px-3 py-2 rounded-md text-sm">
+                                        <div className="font-semibold">Mã khuyến mãi: {bookingData.promoCode}</div>
+                                        <div>Giảm giá: {bookingData.discount.toLocaleString('vi-VN')} đ</div>
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Pricing Summary */}
                             <div className="mb-4">
@@ -216,7 +253,7 @@ const Checkout: React.FC = () => {
                                     </div>
                                 )}
 
-                                <div className="flex justify-between font-bold text-lg mt-2">
+                                <div className="flex justify-between font-bold text-lg mt-2 pt-2 border-t border-gray-200">
                                     <span>Tổng cộng:</span>
                                     <span>{bookingData.total.toLocaleString('vi-VN')} đ</span>
                                 </div>
@@ -242,9 +279,9 @@ const Checkout: React.FC = () => {
                                             <input
                                                 type="radio"
                                                 name="paymentMethod"
-                                                value="card"
-                                                checked={paymentMethod === 'card'}
-                                                onChange={() => handlePaymentMethodChange('card')}
+                                                value="Credit Card"
+                                                checked={paymentMethod === 'Credit Card'}
+                                                onChange={() => handlePaymentMethodChange('Credit Card')}
                                                 className="h-5 w-5 text-primary"
                                             />
                                             <div className="ml-3">
@@ -263,9 +300,8 @@ const Checkout: React.FC = () => {
                                             </div>
                                         </label>
 
-                                        {paymentMethod === 'card' && (
+                                        {paymentMethod === 'Credit Card' && (
                                             <div className="mt-4 ml-8 space-y-4">
-                                                {/* Card fields would go here in a real implementation */}
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                     <div>
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -320,9 +356,9 @@ const Checkout: React.FC = () => {
                                             <input
                                                 type="radio"
                                                 name="paymentMethod"
-                                                value="momo"
-                                                checked={paymentMethod === 'momo'}
-                                                onChange={() => handlePaymentMethodChange('momo')}
+                                                value="MoMo"
+                                                checked={paymentMethod === 'MoMo'}
+                                                onChange={() => handlePaymentMethodChange('MoMo')}
                                                 className="h-5 w-5 text-primary"
                                             />
                                             <div className="ml-3">
@@ -335,7 +371,7 @@ const Checkout: React.FC = () => {
                                             </div>
                                         </label>
 
-                                        {paymentMethod === 'momo' && (
+                                        {paymentMethod === 'MoMo' && (
                                             <div className="mt-4 ml-8">
                                                 <p className="text-gray-600 text-sm">
                                                     Bạn sẽ được chuyển đến trang thanh toán MoMo sau khi xác nhận đặt vé.
@@ -350,9 +386,9 @@ const Checkout: React.FC = () => {
                                             <input
                                                 type="radio"
                                                 name="paymentMethod"
-                                                value="banking"
-                                                checked={paymentMethod === 'banking'}
-                                                onChange={() => handlePaymentMethodChange('banking')}
+                                                value="Banking"
+                                                checked={paymentMethod === 'Banking'}
+                                                onChange={() => handlePaymentMethodChange('Banking')}
                                                 className="h-5 w-5 text-primary"
                                             />
                                             <div className="ml-3">
@@ -371,10 +407,38 @@ const Checkout: React.FC = () => {
                                             </div>
                                         </label>
 
-                                        {paymentMethod === 'banking' && (
+                                        {paymentMethod === 'Banking' && (
                                             <div className="mt-4 ml-8">
                                                 <p className="text-gray-600 text-sm">
                                                     Bạn sẽ được chuyển đến trang thanh toán của ngân hàng sau khi xác nhận đặt vé.
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Cash Payment */}
+                                    <div className="border border-gray-200 rounded-md p-4">
+                                        <label className="flex items-center cursor-pointer">
+                                            <input
+                                                type="radio"
+                                                name="paymentMethod"
+                                                value="Cash"
+                                                checked={paymentMethod === 'Cash'}
+                                                onChange={() => handlePaymentMethodChange('Cash')}
+                                                className="h-5 w-5 text-primary"
+                                            />
+                                            <div className="ml-3">
+                                                <span className="font-medium">Thanh toán tại quầy</span>
+                                                <p className="text-gray-600 text-sm mt-1">
+                                                    Thanh toán bằng tiền mặt tại quầy vé của rạp
+                                                </p>
+                                            </div>
+                                        </label>
+
+                                        {paymentMethod === 'Cash' && (
+                                            <div className="mt-4 ml-8">
+                                                <p className="text-gray-600 text-sm">
+                                                    Vui lòng đến quầy vé trước giờ chiếu 30 phút để thanh toán và nhận vé.
                                                 </p>
                                             </div>
                                         )}
@@ -392,18 +456,21 @@ const Checkout: React.FC = () => {
                                         className="h-5 w-5 mt-0.5 text-primary"
                                     />
                                     <span className="ml-3 text-sm text-gray-600">
-                    Tôi đồng ý với <a href="#" className="text-primary hover:underline">Điều khoản sử dụng</a> và <a href="#" className="text-primary hover:underline">Chính sách bảo mật</a> của CinemaHub.
-                  </span>
+                                        Tôi đồng ý với <a href="#" className="text-primary hover:underline">Điều khoản sử dụng</a> và <a href="#" className="text-primary hover:underline">Chính sách bảo mật</a> của CinemaHub.
+                                    </span>
                                 </label>
                             </div>
 
                             {/* Submit Button */}
                             <div className="flex flex-col sm:flex-row justify-between items-center">
-                                <Link to={`/showtimes/${bookingData.showtimeId}/seats`} className="mb-4 sm:mb-0">
-                                    <Button variant="outline" size="md">
-                                        Quay lại chọn ghế
-                                    </Button>
-                                </Link>
+                                <Button
+                                    variant="outline"
+                                    size="md"
+                                    onClick={handleGoBackToSeatSelection}
+                                    className="mb-4 sm:mb-0"
+                                >
+                                    Quay lại chọn ghế
+                                </Button>
 
                                 <Button
                                     variant="primary"

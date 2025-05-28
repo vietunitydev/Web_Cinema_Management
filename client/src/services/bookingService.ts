@@ -1,6 +1,6 @@
 // src/services/bookingService.ts
 import api from './api';
-import type { ApiResponse, Booking, PaginatedResponse } from '../types/models';
+import type { ApiResponse, PaginatedResponse, Booking } from '../types/models';
 
 export interface CreateBookingData {
     showtimeId: string;
@@ -11,53 +11,76 @@ export interface CreateBookingData {
 
 export interface BookingStats {
     totalRevenue: number;
-    ticketsSold: number;
-    averageTicketPrice: number;
-    data: Array<{
-        date?: string;
-        movieId?: string;
-        cinemaId?: string;
-        count: number;
-        revenue: number;
-    }>;
+    totalBookings: number;
+    totalTickets: number;
+}
+
+export interface DailyStats extends BookingStats {
+    date: string;
+}
+
+export interface MovieStats extends BookingStats {
+    movieId: string;
+    movieTitle: string;
+}
+
+export interface CinemaStats extends BookingStats {
+    cinemaId: string;
+    cinemaName: string;
 }
 
 export const bookingService = {
+    // Create new booking
     createBooking: (bookingData: CreateBookingData) =>
         api.post<ApiResponse<Booking>>('/bookings', bookingData),
 
-    getUserBookings: (page = 1, limit = 10) =>
+    // Get all bookings (Admin/Manager)
+    getAllBookings: (page = 1, limit = 10, filters?: Record<string, any>) =>
+        api.get<ApiResponse<PaginatedResponse<Booking>>>('/bookings', {
+            params: { page, limit, ...filters }
+        }),
+
+    // Get booking by ID
+    getBookingById: (id: string) =>
+        api.get<ApiResponse<Booking>>(`/bookings/${id}`),
+
+    // Update booking status (Admin/Manager)
+    updateBookingStatus: (id: string, status: string) =>
+        api.patch<ApiResponse<Booking>>(`/bookings/${id}/status`, { status }),
+
+    // Verify booking code (Admin/Manager)
+    verifyBookingCode: (bookingCode: string) =>
+        api.get<ApiResponse<Booking>>(`/bookings/verify/${bookingCode}`),
+
+    // Get user's bookings
+    getMyBookings: (page = 1, limit = 10) =>
         api.get<ApiResponse<PaginatedResponse<Booking>>>('/users/mybookings', {
             params: { page, limit }
         }),
 
-    getBookingById: (id: string) =>
-        api.get<ApiResponse<Booking>>(`/bookings/${id}`),
-
-    verifyBookingCode: (code: string) =>
-        api.get<ApiResponse<Booking>>(`/bookings/verify/${code}`),
-
-    // Admin/Manager methods
-    getAllBookings: (page = 1, limit = 10) =>
-        api.get<ApiResponse<PaginatedResponse<Booking>>>('/bookings', {
+    // Get user's bookings by user ID (Admin/Manager)
+    getUserBookings: (userId: string, page = 1, limit = 10) =>
+        api.get<ApiResponse<PaginatedResponse<Booking>>>(`/users/${userId}/bookings`, {
             params: { page, limit }
         }),
 
-    updateBookingStatus: (id: string, status: 'confirmed' | 'canceled') =>
-        api.patch<ApiResponse<Booking>>(`/bookings/${id}/status`, { status }),
-
+    // Statistics
     getDailyStats: (startDate?: string, endDate?: string) =>
-        api.get<ApiResponse<BookingStats>>('/bookings/stats/daily', {
+        api.get<ApiResponse<DailyStats[]>>('/bookings/stats/daily', {
             params: { startDate, endDate }
         }),
 
     getMovieStats: (startDate?: string, endDate?: string) =>
-        api.get<ApiResponse<BookingStats>>('/bookings/stats/movies', {
+        api.get<ApiResponse<MovieStats[]>>('/bookings/stats/movies', {
             params: { startDate, endDate }
         }),
 
     getCinemaStats: (startDate?: string, endDate?: string) =>
-        api.get<ApiResponse<BookingStats>>('/bookings/stats/cinemas', {
+        api.get<ApiResponse<CinemaStats[]>>('/bookings/stats/cinemas', {
             params: { startDate, endDate }
         }),
+
+    // Cancel booking (if allowed)
+    cancelBooking: (id: string) =>
+        api.patch<ApiResponse<Booking>>(`/bookings/${id}/cancel`),
 };

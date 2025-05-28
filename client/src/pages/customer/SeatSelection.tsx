@@ -90,28 +90,51 @@ const SeatSelection: React.FC = () => {
             return;
         }
 
+        if (!showtime || !showtime.movieId || !showtime.cinemaId) {
+            setError((prev) => ({ ...prev, promo: 'Không thể kiểm tra mã khuyến mãi lúc này' }));
+            return;
+        }
+
         setLoading((prev) => ({ ...prev, checkingPromo: true }));
         setError((prev) => ({ ...prev, promo: null }));
         setValidPromo(null);
 
         try {
             const totalAmount = calculateSubtotal();
-            const response = await promotionService.checkCoupon(promoCode, totalAmount);
+            const response = await promotionService.checkCoupon({
+                couponCode: promoCode,
+                totalAmount,
+                movieId: showtime.movieId._id,
+                cinemaId: showtime.cinemaId._id,
+            });
 
-            if (response.data?.valid) {
+            console.log('Promotion check response:', response);
+
+            if (response.data) {
                 setValidPromo(response.data);
                 setPromoDiscount(response.data.discountAmount || 0);
                 toast.success('Áp dụng mã khuyến mãi thành công!');
             } else {
-                setError((prev) => ({ ...prev, promo: response.data?.message || 'Mã khuyến mãi không hợp lệ' }));
+                setError((prev) => ({ ...prev, promo: 'Mã khuyến mãi không hợp lệ' }));
                 setPromoDiscount(0);
             }
-        } catch (err) {
-            setError((prev) => ({ ...prev, promo: 'Đã xảy ra lỗi khi kiểm tra mã khuyến mãi' }));
+        } catch (err: any) {
+            const errorMessage = err.response?.data?.message || 'Đã xảy ra lỗi khi kiểm tra mã khuyến mãi';
+            setError((prev) => ({ ...prev, promo: errorMessage }));
             setPromoDiscount(0);
+            toast.error(errorMessage);
         } finally {
             setLoading((prev) => ({ ...prev, checkingPromo: false }));
         }
+    };
+
+    // Remove promo code
+    const handleRemovePromo = () => {
+        setPromoCode('');
+        setValidPromo(null);
+        setPromoDiscount(0);
+        setError((prev) => ({ ...prev, promo: null }));
+        toast.info('Đã xóa mã khuyến mãi');
     };
 
     // Format date and time
@@ -152,6 +175,7 @@ const SeatSelection: React.FC = () => {
             showtimeId: id,
             seats: selectedSeats,
             promoCode: validPromo ? promoCode : undefined,
+            promotionId: validPromo?.data?._id,
             subtotal: calculateSubtotal(),
             discount: promoDiscount,
             total: calculateTotal(),
@@ -370,6 +394,7 @@ const SeatSelection: React.FC = () => {
                             {/* Promo Code */}
                             <div className="mb-4 pb-4 border-b border-gray-200">
                                 <h3 className="font-semibold mb-2">Mã khuyến mãi</h3>
+
                                 <div className="flex gap-2 mb-2">
                                     <input
                                         type="text"
@@ -397,7 +422,7 @@ const SeatSelection: React.FC = () => {
                                     <div className="bg-green-50 border border-green-200 text-green-800 px-3 py-2 rounded-md text-sm">
                                         <div className="font-semibold">Mã giảm giá hợp lệ!</div>
                                         <div>
-                                            {validPromo.promotion?.name} - Giảm{' '}
+                                            {validPromo.data?.name} - Giảm{' '}
                                             {promoDiscount.toLocaleString('vi-VN')} đ
                                         </div>
                                     </div>
