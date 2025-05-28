@@ -30,8 +30,8 @@ const BookingDetail: React.FC = () => {
     const [reviewLoading, setReviewLoading] = useState(false);
 
     // Check if booking is from the past
-    const isPastBooking = booking?.showtime
-        ? new Date(booking.showtime.startTime) < new Date()
+    const isPastBooking = booking?.showtimeId
+        ? new Date(booking.showtimeId.startTime) < new Date()
         : false;
 
     // Fetch booking details
@@ -47,7 +47,6 @@ const BookingDetail: React.FC = () => {
             setLoading(true);
             try {
                 const response = await bookingService.getBookingById(id);
-                console.log(response);
                 setBooking(response.data ?? null);
                 setError(null);
             } catch {
@@ -59,6 +58,11 @@ const BookingDetail: React.FC = () => {
 
         fetchBooking();
     }, [id, user, navigate]);
+
+    // useEffect(() => {
+    //     console.log(isPastBooking, booking?.status, hasReviewed);
+    //
+    // }, [booking]);
 
     // Generate QR Code data
     const generateQRData = (booking: Booking) => {
@@ -113,7 +117,7 @@ const BookingDetail: React.FC = () => {
     const handleSubmitReview = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!booking || !booking.movie) {
+        if (!booking || !booking.movieId) {
             toast.error('Không thể gửi đánh giá vì thiếu thông tin phim');
             return;
         }
@@ -129,15 +133,17 @@ const BookingDetail: React.FC = () => {
         }
 
         setReviewLoading(true);
+        console.log(booking);
 
         try {
             const reviewData: CreateReviewData = {
-                movieId: booking.movieId,
+                movieId: booking.movieId._id,
                 bookingId: booking._id,
                 rating: reviewRating,
                 title: reviewTitle.trim(),
                 content: reviewContent.trim()
             };
+            console.log(reviewData);
 
             await reviewService.createReview(reviewData);
             toast.success('Đánh giá của bạn đã được gửi và đang chờ phê duyệt!');

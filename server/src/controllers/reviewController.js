@@ -86,12 +86,12 @@ exports.createReview = catchAsync(async (req, res, next) => {
     }
 
     // Kiểm tra booking có thuộc về người dùng không
-    if (booking.userId.toString() !== req.user.id.toString()) {
+    if (booking.userId._id.toString() !== req.user.id.toString()) {
         return next(new AppError('Đơn đặt vé này không thuộc về bạn', 403));
     }
 
     // Kiểm tra booking có thuộc về phim này không
-    if (booking.movieId.toString() !== req.body.movieId.toString()) {
+    if (booking.movieId._id.toString() !== req.body.movieId.toString()) {
         return next(new AppError('Đơn đặt vé này không phải cho phim đã chọn', 400));
     }
 
