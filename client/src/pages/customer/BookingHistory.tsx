@@ -34,8 +34,8 @@ const BookingHistory: React.FC = () => {
         const fetchBookings = async () => {
             setLoading(true);
             try {
-                const response = await bookingService.getUserBookings(currentPage, itemsPerPage);
-                console.log(response);
+                const response = await bookingService.getMyBookings(currentPage, itemsPerPage);
+                // console.log(response);
                 setBookings(response.data?.data || []);
                 setTotalItems(response.data?.totalCount || 0);
                 setTotalPages(response.data?.totalPages || 1);
