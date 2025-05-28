@@ -1,6 +1,7 @@
 // src/pages/customer/BookingConfirmation.tsx
 import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import QRCode from 'react-qr-code';
 import { bookingService } from '../../services/bookingService';
 import { type Booking } from '../../types/models';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -31,6 +32,21 @@ const BookingConfirmation: React.FC = () => {
 
         fetchBooking();
     }, [id]);
+
+    // Generate QR Code data
+    const generateQRData = (booking: Booking) => {
+        const qrData = {
+            bookingId: booking._id,
+            bookingCode: booking.bookingCode || `BK-${booking._id.slice(-8).toUpperCase()}`,
+            movieTitle: booking.movieId?.title || 'Unknown Movie',
+            cinemaName: booking.cinemaId?.name || 'Unknown Cinema',
+            showtime: booking.showtimeId?.startTime || '',
+            seats: booking.seats,
+            totalAmount: booking.finalAmount,
+            verificationUrl: `${window.location.origin}/verify-booking/${booking._id}`
+        };
+        return JSON.stringify(qrData);
+    };
 
     // Format date and time
     const formatDateTime = (dateTimeString: string) => {
@@ -99,9 +115,9 @@ const BookingConfirmation: React.FC = () => {
                                 <div>
                                     <p className="text-gray-600">Tình trạng</p>
                                     <p className="font-semibold">
-                    <span className="inline-block px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">
-                      {booking.status === 'confirmed' ? 'Đã xác nhận' : 'Đang xử lý'}
-                    </span>
+                                        <span className="inline-block px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                                            {booking.status === 'confirmed' ? 'Đã xác nhận' : 'Đang xử lý'}
+                                        </span>
                                     </p>
                                 </div>
                                 <div>
@@ -124,9 +140,6 @@ const BookingConfirmation: React.FC = () => {
                                 </div>
                                 <div>
                                     <h4 className="font-bold text-lg">{booking.movieId.title}</h4>
-                                    {/*<p className="text-gray-600 mb-2">*/}
-                                    {/*    {booking.movieId.duration} phút • {booking.movieId.genre.join(', ')} • {booking.movieId.ageRestriction}*/}
-                                    {/*</p>*/}
                                     <p className="mb-2">
                                         <span className="text-gray-600">Rạp:</span>{' '}
                                         <span className="font-medium">{booking.cinemaId.name}</span>
@@ -153,27 +166,21 @@ const BookingConfirmation: React.FC = () => {
                         {/* QR Code */}
                         <div className="border-b border-gray-200 pb-6 mb-6 text-center">
                             <h3 className="text-xl font-bold mb-4">Mã QR vé điện tử</h3>
-                            <div className="bg-white p-4 mx-auto w-52 h-52 border border-gray-200 rounded-lg flex items-center justify-center">
-                                <div className="text-gray-400">
-                                    {/* Placeholder for QR code */}
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        className="h-32 w-32"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
-                                        />
-                                    </svg>
-                                </div>
+                            <div className="bg-white p-6 mx-auto w-64 h-64 border-2 border-gray-200 rounded-lg flex items-center justify-center shadow-inner">
+                                <QRCode
+                                    size={200}
+                                    style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                                    value={generateQRData(booking)}
+                                    viewBox={`0 0 200 200`}
+                                    fgColor="#000000"
+                                    bgColor="#ffffff"
+                                />
                             </div>
                             <p className="text-gray-600 mt-3 text-sm">
                                 Quét mã QR tại quầy để nhận vé
+                            </p>
+                            <p className="text-xs text-gray-400 mt-1">
+                                Mã vé: {booking.bookingCode || `BK-${booking._id.slice(-8).toUpperCase()}`}
                             </p>
                         </div>
 

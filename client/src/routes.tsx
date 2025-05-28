@@ -48,7 +48,7 @@ import AdminUsers from './pages/admin/Users';
 import AdminUserForm from './pages/admin/UserForm';
 import AdminPromotions from './pages/admin/Promotions';
 import AdminPromotionForm from './pages/admin/PromotionForm';
-// import AdminReviews from './pages/admin/Reviews';
+import AdminReviews from './pages/admin/Reviews';
 import AdminReports from './pages/admin/Reports';
 
 // Error Pages
@@ -437,16 +437,16 @@ export const routes: RouteObject[] = [
             </ProtectedRoute>
         ),
     },
-    // {
-    //     path: '/admin/reviews',
-    //     element: (
-    //         <ProtectedRoute requiredRole="admin">
-    //             <AdminLayout>
-    //                 <AdminReviews />
-    //             </AdminLayout>
-    //         </ProtectedRoute>
-    //     ),
-    // },
+    {
+        path: '/admin/reviews',
+        element: (
+            <ProtectedRoute requiredRole="admin">
+                <AdminLayout>
+                    <AdminReviews />
+                </AdminLayout>
+            </ProtectedRoute>
+        ),
+    },
     {
         path: '/admin/reports',
         element: (
