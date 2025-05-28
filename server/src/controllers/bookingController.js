@@ -132,7 +132,7 @@ exports.createBooking = catchAsync(async (req, res, next) => {
             amount: discountAmount
         },
         finalAmount,
-        status: 'pending'
+        status: 'confirmed'
     });
 
     // Cập nhật trạng thái ghế (chuyển sang tạm thời đã đặt)
