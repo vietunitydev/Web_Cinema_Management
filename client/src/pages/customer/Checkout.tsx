@@ -417,32 +417,32 @@ const Checkout: React.FC = () => {
                                     </div>
 
                                     {/* Cash Payment */}
-                                    <div className="border border-gray-200 rounded-md p-4">
-                                        <label className="flex items-center cursor-pointer">
-                                            <input
-                                                type="radio"
-                                                name="paymentMethod"
-                                                value="Cash"
-                                                checked={paymentMethod === 'Cash'}
-                                                onChange={() => handlePaymentMethodChange('Cash')}
-                                                className="h-5 w-5 text-primary"
-                                            />
-                                            <div className="ml-3">
-                                                <span className="font-medium">Thanh toán tại quầy</span>
-                                                <p className="text-gray-600 text-sm mt-1">
-                                                    Thanh toán bằng tiền mặt tại quầy vé của rạp
-                                                </p>
-                                            </div>
-                                        </label>
+                                    {/*<div className="border border-gray-200 rounded-md p-4">*/}
+                                    {/*    <label className="flex items-center cursor-pointer">*/}
+                                    {/*        <input*/}
+                                    {/*            type="radio"*/}
+                                    {/*            name="paymentMethod"*/}
+                                    {/*            value="Cash"*/}
+                                    {/*            checked={paymentMethod === 'Cash'}*/}
+                                    {/*            onChange={() => handlePaymentMethodChange('Cash')}*/}
+                                    {/*            className="h-5 w-5 text-primary"*/}
+                                    {/*        />*/}
+                                    {/*        <div className="ml-3">*/}
+                                    {/*            <span className="font-medium">Thanh toán tại quầy</span>*/}
+                                    {/*            <p className="text-gray-600 text-sm mt-1">*/}
+                                    {/*                Thanh toán bằng tiền mặt tại quầy vé của rạp*/}
+                                    {/*            </p>*/}
+                                    {/*        </div>*/}
+                                    {/*    </label>*/}
 
-                                        {paymentMethod === 'Cash' && (
-                                            <div className="mt-4 ml-8">
-                                                <p className="text-gray-600 text-sm">
-                                                    Vui lòng đến quầy vé trước giờ chiếu 30 phút để thanh toán và nhận vé.
-                                                </p>
-                                            </div>
-                                        )}
-                                    </div>
+                                    {/*    {paymentMethod === 'Cash' && (*/}
+                                    {/*        <div className="mt-4 ml-8">*/}
+                                    {/*            <p className="text-gray-600 text-sm">*/}
+                                    {/*                Vui lòng đến quầy vé trước giờ chiếu 30 phút để thanh toán và nhận vé.*/}
+                                    {/*            </p>*/}
+                                    {/*        </div>*/}
+                                    {/*    )}*/}
+                                    {/*</div>*/}
                                 </div>
                             </div>
 
