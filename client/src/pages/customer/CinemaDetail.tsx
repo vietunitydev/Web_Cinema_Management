@@ -71,7 +71,7 @@ const CinemaDetail: React.FC = () => {
     }, [id, selectedDate]);
 
     // Group showtimes by movie and format
-    const groupedShowtimes = showtimes.reduce<{
+    const groupedShowtimes = Array.isArray(showtimes) ? showtimes.reduce<{
         [movieId: string]: {
             movie: {
                 _id: string;
@@ -111,7 +111,7 @@ const CinemaDetail: React.FC = () => {
         acc[movieId].formats[format].push(showtime);
 
         return acc;
-    }, {});
+    }, {}) : {};
 
     // Format time from ISO string
     const formatTime = (timeString: string) => {
@@ -215,8 +215,8 @@ const CinemaDetail: React.FC = () => {
                                     key={index}
                                     className="px-3 py-1 bg-gray-100 rounded-full text-gray-800 text-sm"
                                 >
-                  {facility}
-                </span>
+                                    {facility}
+                                </span>
                             ))}
                         </div>
                     </div>
@@ -259,11 +259,10 @@ const CinemaDetail: React.FC = () => {
                             {dateOptions.map((date) => (
                                 <button
                                     key={date.value}
-                                    className={`p-2 text-center rounded-md transition-colors ${
-                                        selectedDate === date.value
+                                    className={`p-2 text-center rounded-md transition-colors ${selectedDate === date.value
                                             ? 'bg-primary text-white'
                                             : 'bg-white border border-gray-300 hover:bg-gray-100'
-                                    }`}
+                                        }`}
                                     onClick={() => setSelectedDate(date.value)}
                                 >
                                     <div className="text-xs">{date.label.split(',')[0]}</div>
@@ -350,9 +349,9 @@ const CinemaDetail: React.FC = () => {
                                         {Object.entries(item.formats).map(([format, showtimes]) => (
                                             <div key={format} className="mb-4 last:mb-0">
                                                 <h4 className="text-md font-medium mb-3 flex items-center">
-                          <span className="inline-block px-2 py-1 bg-gray-200 text-gray-800 text-xs rounded-md mr-2">
-                            {format}
-                          </span>
+                                                    <span className="inline-block px-2 py-1 bg-gray-200 text-gray-800 text-xs rounded-md mr-2">
+                                                        {format}
+                                                    </span>
                                                     {format === '2D' && 'Định dạng 2D'}
                                                     {format === '3D' && 'Định dạng 3D'}
                                                     {format === 'IMAX' && 'Định dạng IMAX'}
@@ -365,13 +364,12 @@ const CinemaDetail: React.FC = () => {
                                                             <Link
                                                                 key={showtime._id}
                                                                 to={`/showtimes/${showtime._id}/seats`}
-                                                                className={`px-4 py-2 rounded-md text-center min-w-[70px] ${
-                                                                    showtime.status === 'open'
+                                                                className={`px-4 py-2 rounded-md text-center min-w-[70px] ${showtime.status === 'open'
                                                                         ? 'bg-white shadow hover:shadow-md border border-gray-200 hover:border-primary transition-all'
                                                                         : showtime.status === 'sold_out'
                                                                             ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
                                                                             : 'bg-red-100 text-red-500 cursor-not-allowed'
-                                                                }`}
+                                                                    }`}
                                                             >
                                                                 <div className="font-medium">
                                                                     {formatTime(showtime.startTime)}
