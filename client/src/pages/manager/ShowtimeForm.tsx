@@ -22,7 +22,7 @@ const ShowtimeForm: React.FC = () => {
     const navigate = useNavigate();
     const isEditing = !!id;
 
-    // Form data
+    // Form data with default prices for new showtimes
     const [formData, setFormData] = useState({
         movieId: '',
         cinemaId: '',
@@ -33,9 +33,9 @@ const ShowtimeForm: React.FC = () => {
         subtitles: [''],
         format: '2D',
         price: {
-            regular: 0,
-            vip: 0,
-            student: 0,
+            regular: 90000,  // Giá mặc định cho vé thường
+            vip: 150000,     // Giá mặc định cho vé VIP
+            student: 55000,  // Giá mặc định cho vé sinh viên
         },
         status: 'open',
     });
@@ -531,6 +531,11 @@ const ShowtimeForm: React.FC = () => {
                 {/* Pricing */}
                 <div className="mb-6">
                     <h3 className="text-lg font-medium text-gray-900 mb-2">Giá vé</h3>
+                    {!isEditing && (
+                        <p className="text-sm text-gray-600 mb-4">
+                            Giá vé mặc định: Thường 90.000₫ | VIP 150.000₫ | Sinh viên 55.000₫
+                        </p>
+                    )}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
                             <label htmlFor="price.regular" className="block text-sm font-medium text-gray-700 mb-1">
@@ -547,7 +552,7 @@ const ShowtimeForm: React.FC = () => {
                                     value={formData.price.regular}
                                     onChange={handleChange}
                                     className="w-full rounded-md border border-gray-300 p-2 pl-8 focus:outline-none focus:ring-2 focus:ring-primary"
-                                    placeholder="0"
+                                    placeholder="90000"
                                     min="0"
                                     required
                                 />
@@ -568,7 +573,7 @@ const ShowtimeForm: React.FC = () => {
                                     value={formData.price.vip}
                                     onChange={handleChange}
                                     className="w-full rounded-md border border-gray-300 p-2 pl-8 focus:outline-none focus:ring-2 focus:ring-primary"
-                                    placeholder="0"
+                                    placeholder="150000"
                                     min="0"
                                 />
                             </div>
@@ -588,7 +593,7 @@ const ShowtimeForm: React.FC = () => {
                                     value={formData.price.student}
                                     onChange={handleChange}
                                     className="w-full rounded-md border border-gray-300 p-2 pl-8 focus:outline-none focus:ring-2 focus:ring-primary"
-                                    placeholder="0"
+                                    placeholder="55000"
                                     min="0"
                                 />
                             </div>

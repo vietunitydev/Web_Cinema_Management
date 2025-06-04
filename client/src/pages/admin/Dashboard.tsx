@@ -105,6 +105,7 @@ const Dashboard: React.FC = () => {
             // Fetch movie stats
             try {
                 const response = await bookingService.getMovieStats(startDate, endDate);
+                console.log(response.data);
                 setMovieStats(response.data ?? null);
                 setLoading((prev) => ({ ...prev, movies: false }));
             } catch {

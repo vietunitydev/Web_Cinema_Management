@@ -51,6 +51,9 @@ import AdminPromotionForm from './pages/admin/PromotionForm';
 import AdminReviews from './pages/admin/Reviews';
 import AdminReports from './pages/admin/Reports';
 
+// Verify Pages
+import VerifyBooking from './pages/VerifyBooking';
+
 // Error Pages
 import NotFound from './pages/NotFound';
 
@@ -110,6 +113,12 @@ export const routes: RouteObject[] = [
     {
         path: '/reset-password',
         element: <ResetPassword />,
+    },
+
+    // Verify booking route (public for staff)
+    {
+        path: '/verify-booking/:id',
+        element: <VerifyBooking />,
     },
 
     // Customer routes

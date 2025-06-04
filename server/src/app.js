@@ -20,6 +20,7 @@ const showtimeRoutes = require('./routes/showtimeRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const promotionRoutes = require('./routes/promotionRoutes');
+const verifyRoutes = require('./routes/verifyRoutes');
 
 // Khởi tạo app Express
 const app = express();
@@ -69,6 +70,7 @@ app.use('/api/showtimes', showtimeRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/promotions', promotionRoutes);
+app.use('/api/verify', promotionRoutes);
 
 // Route mặc định cho API
 app.get('/api', (req, res) => {
