@@ -8,6 +8,7 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import Button from '../../components/common/Button';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
+import {reviewService} from "../../services/reviewService.ts";
 
 interface ErrorState
 {
@@ -44,7 +45,17 @@ const MovieDetail: React.FC = () => {
                 const response = await movieService.getMovieById(id);
                 // console.log(response.data);
                 setMovie(response.data ?? null);
-                setReviews(response.data.reviews || []);
+                setLoading((prev) => ({ ...prev, movie: false }));
+                setLoading((prev) => ({ ...prev, reviews: false }));
+            } catch {
+                setError((prev) => ({ ...prev, movie: 'Không thể tải thông tin phim' }));
+                setLoading((prev) => ({ ...prev, movie: false }));
+            }
+
+            try {
+                const response = await reviewService.getAllMovieReviews(id);
+                console.log(response.data);
+                setReviews(response.data.data || []);
                 setLoading((prev) => ({ ...prev, movie: false }));
                 setLoading((prev) => ({ ...prev, reviews: false }));
             } catch {
@@ -55,9 +66,9 @@ const MovieDetail: React.FC = () => {
             // Fetch upcoming showtimes
             try {
                 const today = new Date().toISOString().split('T')[0];
-                console.log(today);
+                // console.log(today);
                 const response = await movieService.getMovieShowtimes(id, today);
-                console.log(response.data);
+                // console.log(response.data);
 
                 setUpcomingShowtimes(response.data || []);
                 setLoading((prev) => ({ ...prev, showtimes: false }));

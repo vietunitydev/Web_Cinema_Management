@@ -48,7 +48,7 @@ const MovieReviews: React.FC = () => {
         const fetchReviews = async () => {
             setLoading(prev => ({ ...prev, reviews: true }));
             try {
-                const response = await reviewService.getAllReviews(id, currentPage, 10);
+                const response = await reviewService.getAllMovieReviews(id);
                 setReviews(response.data.data || []);
                 setTotalPages(response.data.totalPages || 1);
                 setLoading(prev => ({ ...prev, reviews: false }));

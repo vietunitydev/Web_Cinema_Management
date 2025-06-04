@@ -16,6 +16,11 @@ export const reviewService = {
             params: { page, limit }
         }),
 
+    getAllMovieReviews: (movieId : string,page = 1, limit = 10) =>
+        api.get<ApiResponse<PaginatedResponse<Review>>>('/reviews', {
+            params: { movieId, page, limit }
+        }),
+
     getUserReviews: (page = 1, limit = 10) =>
         api.get<ApiResponse<PaginatedResponse<Review>>>('/reviews/myreviews', {
             params: { page, limit }
