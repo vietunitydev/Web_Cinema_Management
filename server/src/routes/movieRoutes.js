@@ -28,27 +28,38 @@ router.use(authMiddleware.protect);
 // Routes chỉ dành cho Admin và Manager
 router.use(authMiddleware.restrictTo('admin', 'manager'));
 
+// Get movie options for dropdowns
 router.get('/options', movieController.getMovieOptions);
 
+// Movie creation routes
+router.post('/',
+    movieValidation,
+    validate,
+    movieController.createMovie
+);
 
-// Quản lý phim
-// router.route('/')
-//     .post(uploadMiddleware.uploadMovieImages,
-//         uploadMiddleware.processMovieImages,
-//         movieValidation,
-//         validate,
-//         movieController.createMovie);
+router.post('/with-file',
+    uploadMiddleware.uploadMovieImages,
+    uploadMiddleware.processMovieImages,
+    uploadMiddleware.handleMulterError,
+    movieValidation,
+    validate,
+    movieController.createMovieWithFile
+);
 
-router.route('/')
-    .post(
-        movieValidation,
-        validate,
-        movieController.createMovie);
+// Movie update routes
+router.patch('/:id',
+    movieController.updateMovie
+);
 
-router.route('/:id')
-    .patch(uploadMiddleware.uploadMovieImages,
-        uploadMiddleware.processMovieImages,
-        movieController.updateMovie)
-    .delete(movieController.deleteMovie);
+router.patch('/:id/with-file',
+    uploadMiddleware.uploadMovieImages,
+    uploadMiddleware.processMovieImages,
+    uploadMiddleware.handleMulterError,
+    movieController.updateMovieWithFile
+);
+
+// Movie deletion
+router.delete('/:id', movieController.deleteMovie);
 
 module.exports = router;

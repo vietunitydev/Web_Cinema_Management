@@ -1,5 +1,5 @@
 // src/pages/admin/MovieForm.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -30,11 +30,18 @@ const MovieForm: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const isEditing = !!id;
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [movie, setMovie] = useState<Movie | null>(null);
     const [loading, setLoading] = useState(isEditing);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Poster upload states
+    const [posterOption, setPosterOption] = useState<'url' | 'upload'>('url');
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [filePreview, setFilePreview] = useState<string | null>(null);
+    const [uploadProgress, setUploadProgress] = useState(0);
 
     // Fetch movie details if editing
     useEffect(() => {
@@ -57,6 +64,50 @@ const MovieForm: React.FC = () => {
 
         fetchMovie();
     }, [id, isEditing]);
+
+    // Handle file selection
+    const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            toast.error('Vui lòng chọn file ảnh hợp lệ');
+            return;
+        }
+
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error('Kích thước file không được vượt quá 5MB');
+            return;
+        }
+
+        setSelectedFile(file);
+
+        // Create preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            setFilePreview(e.target?.result as string);
+        };
+        reader.readAsDataURL(file);
+
+        // Clear posterUrl when file is selected
+        formik.setFieldValue('posterUrl', '');
+    };
+
+    // Handle poster option change
+    const handlePosterOptionChange = (option: 'url' | 'upload') => {
+        setPosterOption(option);
+        if (option === 'url') {
+            setSelectedFile(null);
+            setFilePreview(null);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+        } else {
+            formik.setFieldValue('posterUrl', '');
+        }
+    };
 
     // Set up formik with validation
     const formik = useFormik<MovieFormValues>({
@@ -93,10 +144,24 @@ const MovieForm: React.FC = () => {
             genre: Yup.string().required('Vui lòng chọn thể loại phim'),
             language: Yup.string().required('Vui lòng nhập ngôn ngữ phim'),
             ageRestriction: Yup.string().required('Vui lòng chọn giới hạn độ tuổi'),
-            posterUrl: Yup.string().url('URL không hợp lệ').required('Vui lòng nhập URL poster'),
+            posterUrl: Yup.string().when('posterOption', {
+                is: 'url',
+                then: (schema) => schema.url('URL không hợp lệ').required('Vui lòng nhập URL poster'),
+                otherwise: (schema) => schema.notRequired()
+            }),
             status: Yup.string().required('Vui lòng chọn trạng thái phim'),
         }),
         onSubmit: async (values) => {
+            // Validate poster requirement
+            if (posterOption === 'url' && !values.posterUrl) {
+                toast.error('Vui lòng nhập URL poster');
+                return;
+            }
+            if (posterOption === 'upload' && !selectedFile && !movie?.posterUrl) {
+                toast.error('Vui lòng chọn file ảnh poster');
+                return;
+            }
+
             setSubmitting(true);
 
             try {
@@ -107,19 +172,48 @@ const MovieForm: React.FC = () => {
                     subtitles: values.subtitles.split(',').map(subtitle => subtitle.trim()),
                 };
 
+                // Create FormData for file upload
+                const formData = new FormData();
+
+                // Append movie data
+                Object.entries(movieData).forEach(([key, value]) => {
+                    if (key === 'cast' || key === 'genre' || key === 'subtitles') {
+                        formData.append(key, JSON.stringify(value));
+                    } else {
+                        formData.append(key, value as string);
+                    }
+                });
+
+                // Append poster file if uploading
+                if (posterOption === 'upload' && selectedFile) {
+                    formData.append('poster', selectedFile);
+                }
+
+                // Track upload progress
+                const config = {
+                    onUploadProgress: (progressEvent: any) => {
+                        const progress = Math.round(
+                            (progressEvent.loaded * 100) / progressEvent.total
+                        );
+                        setUploadProgress(progress);
+                    }
+                };
+
                 if (isEditing) {
-                    await movieService.updateMovie(id, movieData);
+                    await movieService.updateMovieWithFile(id, formData, config);
                     toast.success('Cập nhật phim thành công');
                 } else {
-                    await movieService.createMovie(movieData as any); // Type cast needed here
+                    await movieService.createMovieWithFile(formData, config);
                     toast.success('Thêm phim mới thành công');
                 }
 
                 navigate('/admin/movies');
-            } catch{
-                toast.error('Có lỗi xảy ra. Vui lòng thử lại sau.');
+            } catch (error: any) {
+                console.error('Movie form error:', error);
+                toast.error(error.response?.data?.message || 'Có lỗi xảy ra. Vui lòng thử lại sau.');
             } finally {
                 setSubmitting(false);
+                setUploadProgress(0);
             }
         },
     });
@@ -250,59 +344,114 @@ const MovieForm: React.FC = () => {
                         )}
                     </div>
 
-                    {/* Poster URL */}
+                    {/* Poster Section */}
                     <div className="md:col-span-2">
-                        <label htmlFor="posterUrl" className="block text-sm font-medium text-gray-700 mb-1">
-                            URL Poster <span className="text-red-500">*</span>
+                        <label className="block text-sm font-medium text-gray-700 mb-3">
+                            Poster phim <span className="text-red-500">*</span>
                         </label>
-                        <input
-                            type="url"
-                            id="posterUrl"
-                            className={`w-full rounded-md border ${
-                                formik.touched.posterUrl && formik.errors.posterUrl
-                                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                                    : 'border-gray-300 focus:ring-primary focus:border-primary'
-                            } p-2 focus:outline-none focus:ring-2`}
-                            placeholder="Nhập URL ảnh poster"
-                            {...formik.getFieldProps('posterUrl')}
-                        />
-                        {formik.touched.posterUrl && formik.errors.posterUrl && (
-                            <p className="mt-1 text-sm text-red-600">{formik.errors.posterUrl}</p>
+
+                        {/* Poster Options */}
+                        <div className="flex space-x-4 mb-4">
+                            <label className="flex items-center">
+                                <input
+                                    type="radio"
+                                    name="posterOption"
+                                    value="url"
+                                    checked={posterOption === 'url'}
+                                    onChange={() => handlePosterOptionChange('url')}
+                                    className="mr-2"
+                                />
+                                <span>Nhập URL</span>
+                            </label>
+                            <label className="flex items-center">
+                                <input
+                                    type="radio"
+                                    name="posterOption"
+                                    value="upload"
+                                    checked={posterOption === 'upload'}
+                                    onChange={() => handlePosterOptionChange('upload')}
+                                    className="mr-2"
+                                />
+                                <span>Upload file ảnh</span>
+                            </label>
+                        </div>
+
+                        {/* URL Input */}
+                        {posterOption === 'url' && (
+                            <div>
+                                <input
+                                    type="url"
+                                    className={`w-full rounded-md border ${
+                                        formik.touched.posterUrl && formik.errors.posterUrl
+                                            ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                                            : 'border-gray-300 focus:ring-primary focus:border-primary'
+                                    } p-2 focus:outline-none focus:ring-2`}
+                                    placeholder="Nhập URL ảnh poster"
+                                    {...formik.getFieldProps('posterUrl')}
+                                />
+                                {formik.touched.posterUrl && formik.errors.posterUrl && (
+                                    <p className="mt-1 text-sm text-red-600">{formik.errors.posterUrl}</p>
+                                )}
+                            </div>
                         )}
-                        {formik.values.posterUrl && (
-                            <div className="mt-2 flex items-center">
+
+                        {/* File Upload */}
+                        {posterOption === 'upload' && (
+                            <div>
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleFileSelect}
+                                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                />
+                                <p className="mt-1 text-xs text-gray-500">
+                                    Chấp nhận các định dạng: JPG, PNG, GIF. Kích thước tối đa: 5MB
+                                </p>
+                            </div>
+                        )}
+
+                        {/* Preview */}
+                        {(posterOption === 'url' && formik.values.posterUrl) ||
+                        (posterOption === 'upload' && filePreview) ||
+                        (isEditing && movie?.posterUrl) ? (
+                            <div className="mt-4 flex items-center">
                                 <img
-                                    src={formik.values.posterUrl}
+                                    src={
+                                        posterOption === 'upload' && filePreview
+                                            ? filePreview
+                                            : posterOption === 'url' && formik.values.posterUrl
+                                                ? formik.values.posterUrl
+                                                : movie?.posterUrl
+                                    }
                                     alt="Poster preview"
-                                    className="h-24 w-16 object-cover rounded"
+                                    className="h-32 w-20 object-cover rounded border"
                                     onError={(e) => (e.currentTarget.src = 'https://via.placeholder.com/160x240?text=Error')}
                                 />
-                                <span className="ml-2 text-sm text-gray-500">Xem trước poster phim</span>
+                                <span className="ml-3 text-sm text-gray-500">
+                                    {posterOption === 'upload' && selectedFile
+                                        ? `File đã chọn: ${selectedFile.name}`
+                                        : 'Xem trước poster phim'
+                                    }
+                                </span>
+                            </div>
+                        ) : null}
+
+                        {/* Upload Progress */}
+                        {submitting && uploadProgress > 0 && posterOption === 'upload' && (
+                            <div className="mt-2">
+                                <div className="bg-gray-200 rounded-full h-2">
+                                    <div
+                                        className="bg-primary h-2 rounded-full transition-all duration-300"
+                                        style={{ width: `${uploadProgress}%` }}
+                                    ></div>
+                                </div>
+                                <p className="text-sm text-gray-600 mt-1">Đang upload: {uploadProgress}%</p>
                             </div>
                         )}
                     </div>
 
-                    {/* Trailer URL */}
-                    <div className="md:col-span-2">
-                        <label htmlFor="trailerUrl" className="block text-sm font-medium text-gray-700 mb-1">
-                            URL Trailer
-                        </label>
-                        <input
-                            type="url"
-                            id="trailerUrl"
-                            className={`w-full rounded-md border ${
-                                formik.touched.trailerUrl && formik.errors.trailerUrl
-                                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                                    : 'border-gray-300 focus:ring-primary focus:border-primary'
-                            } p-2 focus:outline-none focus:ring-2`}
-                            placeholder="Nhập URL trailer (tùy chọn)"
-                            {...formik.getFieldProps('trailerUrl')}
-                        />
-                        {formik.touched.trailerUrl && formik.errors.trailerUrl && (
-                            <p className="mt-1 text-sm text-red-600">{formik.errors.trailerUrl}</p>
-                        )}
-                    </div>
-
+                    {/* Phần còn lại của form giữ nguyên... */}
                     {/* Thông tin chi tiết */}
                     <div className="md:col-span-2 border-t pt-6 mt-4">
                         <h2 className="text-xl font-semibold mb-4">Thông tin chi tiết</h2>
@@ -521,7 +670,10 @@ const MovieForm: React.FC = () => {
                         isLoading={submitting}
                         disabled={submitting || !formik.isValid}
                     >
-                        {isEditing ? 'Cập nhật' : 'Thêm phim'}
+                        {submitting
+                            ? (uploadProgress > 0 ? `Đang upload ${uploadProgress}%` : 'Đang xử lý...')
+                            : (isEditing ? 'Cập nhật' : 'Thêm phim')
+                        }
                     </Button>
                 </div>
             </form>

@@ -1,6 +1,6 @@
-// src/services/movieService.ts
 import api from './api';
 import type { ApiResponse, Movie, PaginatedResponse, Review, Showtime, MovieOption } from '../types/models';
+import type {AxiosRequestConfig} from "axios";
 
 export interface MovieFilters {
     title?: string;
@@ -60,8 +60,26 @@ export const movieService = {
     createMovie: (movieData: Omit<Movie, '_id'>) =>
         api.post<ApiResponse<Movie>>('/movies', movieData),
 
+    createMovieWithFile: (formData: FormData, config?: AxiosRequestConfig) =>
+        api.post<ApiResponse<Movie>>('/movies/with-file', formData, {
+            ...config,
+            headers: {
+                ...config?.headers,
+                'Content-Type': 'multipart/form-data',
+            },
+        }),
+
     updateMovie: (id: string, movieData: Partial<Movie>) =>
         api.patch<ApiResponse<Movie>>(`/movies/${id}`, movieData),
+
+    updateMovieWithFile: (id: string, formData: FormData, config?: AxiosRequestConfig) =>
+        api.patch<ApiResponse<Movie>>(`/movies/${id}/with-file`, formData, {
+            ...config,
+            headers: {
+                ...config?.headers,
+                'Content-Type': 'multipart/form-data',
+            },
+        }),
 
     deleteMovie: (id: string) =>
         api.delete<ApiResponse<null>>(`/movies/${id}`),

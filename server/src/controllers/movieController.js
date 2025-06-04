@@ -1,10 +1,11 @@
+const mongoose = require('mongoose');
 const Movie = require('../models/Movie');
 const Review = require('../models/Review');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const APIFeatures = require('../utils/apiFeatures');
 const cloudinary = require('../config/cloudinary');
-const mongoose = require("mongoose");
+const { deleteFromCloudinary } = require('../middlewares/upload');
 
 /**
  * @desc    Lấy tất cả phim
@@ -61,28 +62,22 @@ exports.getMovie = catchAsync(async (req, res, next) => {
 });
 
 /**
- * @desc    Tạo phim mới
+ * @desc    Tạo phim mới (URL-based)
  * @route   POST /api/movies
  * @access  Private (Admin)
  */
 exports.createMovie = catchAsync(async (req, res, next) => {
-    // Xử lý URL poster nếu đã có từ middleware
-    // if (req.body.posterUrl) {
-    //     req.body.posterUrl = req.body.posterUrl;
-    // }
-    //
-    // // Xử lý URL trailer nếu có
-    // if (req.body.trailerUrl) {
-    //     // Có thể thêm logic kiểm tra URL trailer hợp lệ ở đây
-    // }
+    console.log('Creating movie with URL-based poster:', req.body);
 
-    console.log(req.body);
+    // Validate required poster URL
+    if (!req.body.posterUrl) {
+        return next(new AppError('Vui lòng cung cấp URL poster', 400));
+    }
 
     // Tạo phim mới
     const newMovie = await Movie.create(req.body);
 
-    console.log("created done");
-
+    console.log("Movie created successfully");
 
     res.status(201).json({
         status: 'success',
@@ -93,11 +88,56 @@ exports.createMovie = catchAsync(async (req, res, next) => {
 });
 
 /**
- * @desc    Cập nhật thông tin phim
+ * @desc    Tạo phim mới với file upload
+ * @route   POST /api/movies/with-file
+ * @access  Private (Admin)
+ */
+exports.createMovieWithFile = catchAsync(async (req, res, next) => {
+    console.log('Creating movie with file upload...');
+    console.log('Body:', req.body);
+    console.log('Files:', req.files);
+
+    // Validate poster requirement
+    if (!req.body.posterUrl && (!req.files || !req.files.poster)) {
+        return next(new AppError('Vui lòng cung cấp poster (URL hoặc file)', 400));
+    }
+
+    try {
+        // Create movie
+        const newMovie = await Movie.create(req.body);
+
+        console.log("Movie created successfully with file upload");
+
+        res.status(201).json({
+            status: 'success',
+            data: {
+                movie: newMovie
+            }
+        });
+    } catch (error) {
+        // If movie creation fails, delete uploaded images
+        if (req.files) {
+            if (req.files.poster) {
+                await deleteFromCloudinary(req.files.poster[0].path);
+            }
+            if (req.files.trailerThumbnail) {
+                await deleteFromCloudinary(req.files.trailerThumbnail[0].path);
+            }
+        }
+
+        console.error('Error creating movie:', error);
+        return next(new AppError('Lỗi khi tạo phim', 500));
+    }
+});
+
+/**
+ * @desc    Cập nhật thông tin phim (URL-based)
  * @route   PATCH /api/movies/:id
  * @access  Private (Admin)
  */
 exports.updateMovie = catchAsync(async (req, res, next) => {
+    console.log('Updating movie with URL-based data:', req.body);
+
     // Tìm phim và cập nhật
     const movie = await Movie.findByIdAndUpdate(req.params.id, req.body, {
         new: true,
@@ -117,6 +157,75 @@ exports.updateMovie = catchAsync(async (req, res, next) => {
 });
 
 /**
+ * @desc    Cập nhật thông tin phim với file upload
+ * @route   PATCH /api/movies/:id/with-file
+ * @access  Private (Admin)
+ */
+exports.updateMovieWithFile = catchAsync(async (req, res, next) => {
+    console.log('Updating movie with file upload...');
+    console.log('Movie ID:', req.params.id);
+    console.log('Body:', req.body);
+    console.log('Files:', req.files);
+
+    // Find existing movie
+    const existingMovie = await Movie.findById(req.params.id);
+    if (!existingMovie) {
+        // Delete uploaded files if movie not found
+        if (req.files) {
+            if (req.files.poster) {
+                await deleteFromCloudinary(req.files.poster[0].path);
+            }
+            if (req.files.trailerThumbnail) {
+                await deleteFromCloudinary(req.files.trailerThumbnail[0].path);
+            }
+        }
+        return next(new AppError('Không tìm thấy phim với ID này', 404));
+    }
+
+    try {
+        // Store old image URLs for cleanup
+        const oldPosterUrl = existingMovie.posterUrl;
+        const oldTrailerThumbnailUrl = existingMovie.trailerThumbnailUrl;
+
+        // Update movie
+        const updatedMovie = await Movie.findByIdAndUpdate(req.params.id, req.body, {
+            new: true,
+            runValidators: true
+        });
+
+        // Delete old images if new ones were uploaded
+        if (req.files && req.files.poster && oldPosterUrl) {
+            await deleteFromCloudinary(oldPosterUrl);
+        }
+        if (req.files && req.files.trailerThumbnail && oldTrailerThumbnailUrl) {
+            await deleteFromCloudinary(oldTrailerThumbnailUrl);
+        }
+
+        console.log("Movie updated successfully with file upload");
+
+        res.status(200).json({
+            status: 'success',
+            data: {
+                movie: updatedMovie
+            }
+        });
+    } catch (error) {
+        // If update fails, delete newly uploaded images
+        if (req.files) {
+            if (req.files.poster) {
+                await deleteFromCloudinary(req.files.poster[0].path);
+            }
+            if (req.files.trailerThumbnail) {
+                await deleteFromCloudinary(req.files.trailerThumbnail[0].path);
+            }
+        }
+
+        console.error('Error updating movie:', error);
+        return next(new AppError('Lỗi khi cập nhật phim', 500));
+    }
+});
+
+/**
  * @desc    Xóa phim
  * @route   DELETE /api/movies/:id
  * @access  Private (Admin)
@@ -128,19 +237,26 @@ exports.deleteMovie = catchAsync(async (req, res, next) => {
         return next(new AppError('Không tìm thấy phim với ID này', 404));
     }
 
-    // Xóa poster từ Cloudinary nếu có
-    if (movie.posterUrl && movie.posterUrl.startsWith('https://res.cloudinary.com')) {
-        const publicId = movie.posterUrl.split('/').pop().split('.')[0];
-        await cloudinary.uploader.destroy(`cinema/${publicId}`);
+    try {
+        // Delete images from Cloudinary
+        if (movie.posterUrl) {
+            await deleteFromCloudinary(movie.posterUrl);
+        }
+        if (movie.trailerThumbnailUrl) {
+            await deleteFromCloudinary(movie.trailerThumbnailUrl);
+        }
+
+        // Delete movie
+        await Movie.findByIdAndDelete(req.params.id);
+
+        res.status(204).json({
+            status: 'success',
+            data: null
+        });
+    } catch (error) {
+        console.error('Error deleting movie:', error);
+        return next(new AppError('Lỗi khi xóa phim', 500));
     }
-
-    // Xóa phim
-    await movie.remove();
-
-    res.status(204).json({
-        status: 'success',
-        data: null
-    });
 });
 
 /**
