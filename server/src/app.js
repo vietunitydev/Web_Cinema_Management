@@ -70,7 +70,7 @@ app.use('/api/showtimes', showtimeRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/promotions', promotionRoutes);
-app.use('/api/verify', promotionRoutes);
+app.use('/api/verify', verifyRoutes);
 
 // Route mặc định cho API
 app.get('/api', (req, res) => {

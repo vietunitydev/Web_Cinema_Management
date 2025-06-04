@@ -48,9 +48,16 @@ export const bookingService = {
     updateBookingStatus: (id: string, status: string) =>
         api.patch<ApiResponse<Booking>>(`/bookings/${id}/status`, { status }),
 
+    verifyBookingId: (bookingId: string) =>
+        api.get<ApiResponse<{ booking: Booking; verification: { status: string; message: string; verifiedAt: string } }>>(
+            `/verify/booking/${bookingId}`
+        ),
+
     // Verify booking code (Admin/Manager)
     verifyBookingCode: (bookingCode: string) =>
-        api.get<ApiResponse<Booking>>(`/bookings/verify/${bookingCode}`),
+        api.get<ApiResponse<{ booking: Booking; verification: { status: string; message: string; verifiedAt: string } }>>(
+            `/verify/booking-code/${bookingCode}`
+        ),
 
     // Get user's bookings
     getMyBookings: (page = 1, limit = 10) =>

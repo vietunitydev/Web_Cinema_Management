@@ -13,7 +13,8 @@ const VerifyBooking: React.FC = () => {
     const [booking, setBooking] = useState<Booking | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [verificationStatus, setVerificationStatus] = useState<'valid' | 'invalid' | 'expired' | null>(null);
+    const [verificationStatus, setVerificationStatus] = useState<'valid' | 'invalid' | 'expired' | 'pending' | null>(null);
+    const [verificationMessage, setVerificationMessage] = useState<string>('');
 
     useEffect(() => {
         const verifyBooking = async () => {
@@ -25,26 +26,22 @@ const VerifyBooking: React.FC = () => {
 
             try {
                 // Gọi API để xác thực booking
-                const response = await bookingService.getBookingById(id);
-                const bookingData = response.data;
+                const response = await bookingService.verifyBookingId(id);
+                // console.log(response);
 
-                if (!bookingData) {
+                // Kiểm tra nếu không có dữ liệu
+                if (!response.data || !response.data.booking) {
                     setVerificationStatus('invalid');
                     setError('Vé không tồn tại');
                     setLoading(false);
                     return;
                 }
 
+                // Lấy dữ liệu từ response
+                const { booking: bookingData, verification } = response.data;
                 setBooking(bookingData);
-
-                // Kiểm tra trạng thái vé
-                if (bookingData.status === 'canceled') {
-                    setVerificationStatus('invalid');
-                } else if (bookingData.showtimeId && new Date(bookingData.showtimeId.startTime) < new Date()) {
-                    setVerificationStatus('expired');
-                } else {
-                    setVerificationStatus('valid');
-                }
+                setVerificationStatus(verification.status);
+                setVerificationMessage(verification.message);
 
                 setLoading(false);
             } catch (err) {
@@ -76,7 +73,7 @@ const VerifyBooking: React.FC = () => {
                         </svg>
                     ),
                     title: 'Vé hợp lệ',
-                    message: 'Vé điện tử này có hiệu lực và có thể sử dụng.'
+                    message: verificationMessage || 'Vé điện tử này có hiệu lực và có thể sử dụng.'
                 };
             case 'expired':
                 return {
@@ -88,7 +85,19 @@ const VerifyBooking: React.FC = () => {
                         </svg>
                     ),
                     title: 'Vé đã hết hạn',
-                    message: 'Suất chiếu đã kết thúc. Vé này không còn hiệu lực.'
+                    message: verificationMessage || 'Suất chiếu đã kết thúc. Vé này không còn hiệu lực.'
+                };
+            case 'pending':
+                return {
+                    bgColor: 'bg-blue-500',
+                    textColor: 'text-blue-600',
+                    icon: (
+                        <svg className="w-16 h-16 mx-auto text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l1.5 1.5m-1.5 2.5a7 7 0 100-14 7 7 0 000 14z" />
+                        </svg>
+                    ),
+                    title: 'Vé đang chờ xác nhận',
+                    message: verificationMessage || 'Vé chưa được xác nhận thanh toán.'
                 };
             case 'invalid':
             default:
@@ -101,7 +110,7 @@ const VerifyBooking: React.FC = () => {
                         </svg>
                     ),
                     title: 'Vé không hợp lệ',
-                    message: 'Vé điện tử này không tồn tại hoặc đã bị hủy.'
+                    message: verificationMessage || 'Vé điện tử này không tồn tại hoặc đã bị hủy.'
                 };
         }
     };
@@ -214,6 +223,26 @@ const VerifyBooking: React.FC = () => {
                                                 <div className="mt-2 text-sm text-yellow-700">
                                                     <p>
                                                         Suất chiếu đã kết thúc. Vé này không thể sử dụng để vào rạp.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {verificationStatus === 'pending' && (
+                                    <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                                        <div className="flex">
+                                            <div className="flex-shrink-0">
+                                                <svg className="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-1-11a1 1 0 112 0v4a1 1 0 01-2 0V7zm1 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                                                </svg>
+                                            </div>
+                                            <div className="ml-3">
+                                                <h3 className="text-sm font-medium text-blue-800">Vé đang chờ xác nhận</h3>
+                                                <div className="mt-2 text-sm text-blue-700">
+                                                    <p>
+                                                        Vé này chưa được xác nhận thanh toán. Vui lòng kiểm tra trạng thái thanh toán trước khi cho phép vào rạp.
                                                     </p>
                                                 </div>
                                             </div>
